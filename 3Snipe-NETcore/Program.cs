@@ -12,6 +12,7 @@ namespace _3Snipe_NETcore
 {
     class Program
     {
+        static bool snipedAlready = false;
         static void Main(string[] args)
         {
             Console.WriteLine(@"                                                 
@@ -48,6 +49,7 @@ NOTICE: Use an access token from 45 minutes or less ago.
             Console.WriteLine("Enter name to snipe and press enter: ");
             string name = Console.ReadLine();
             WebClient sniperClient = new WebClient();
+            Console.WriteLine();
             try
             {
                 int l = 0;
@@ -82,12 +84,44 @@ NOTICE: Use an access token from 45 minutes or less ago.
             }
             sniperClient.Headers[HttpRequestHeader.Authorization] = $"Bearer {accessToken}";
             string payload = "{'name': '" + name + "', 'password': '" + password + "'}";
-            bool snipedAlready = false;
+
             var temp = sniperClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
             Console.WriteLine(temp);
             userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
             Console.WriteLine(userUUID);
-            try
+            List<Thread> threads = new List<Thread>();
+            void sniperthread()
+            {
+                if (snipedAlready)
+                    return;
+                try
+                {
+                    string response = sniperClient.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
+                    if (response != string.Empty)
+                        Console.WriteLine($"[Info] Got status code of 2XX on a thread.");
+                    else
+                        Console.WriteLine($"[Info] Got status code of 204 on a thread.");
+                    snipedAlready = true;
+                    return;
+                }
+                catch (WebException e)
+                {
+                    HttpStatusCode code = ((HttpWebResponse)e.Response).StatusCode;
+                    if (code == HttpStatusCode.NoContent)
+                    {
+                        snipedAlready = true;
+                    }
+                    else
+                    {
+                    }
+                    Console.WriteLine($"[Info] Got status code of {code} on a thread.");
+                }
+            }
+            for (int i = 0; i < 20; i++)
+            {
+                threads.Add(new Thread(new ThreadStart(sniperthread)));
+            }
+                try
             {
                 Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(10));
             }
@@ -96,32 +130,16 @@ NOTICE: Use an access token from 45 minutes or less ago.
             {
                 if (snipedAlready)
                     break;
-                try
-                {
-                    string response = sniperClient.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
-                    if (response != string.Empty)
-                        Console.WriteLine($"[Info] Got status code of 2XX on attempt {i}.");
-                    else
-                        Console.WriteLine($"[Info] Got status code of 204 on attempt {i}.");
-                    snipedAlready = true;
-                    break;
-                }
-                catch (WebException e)
-                {
-                    HttpStatusCode code = ((HttpWebResponse)e.Response).StatusCode;
-                    if (code == HttpStatusCode.NoContent)
-                    {
-                        snipedAlready = true;
-                    } else
-                    {
-                    }
-                    Console.WriteLine($"[Info] Got status code of {code} on attempt {i}.");
-                }
+                threads[i].Start();
                 Thread.Sleep(5);
             }
             accessToken = "Disposed.";
             password = "Disposed.";
             payload = "Disposed.";
+            try
+            {
+                Thread.Sleep(5000);
+            } catch { }
             if (snipedAlready)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
