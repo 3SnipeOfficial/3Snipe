@@ -96,7 +96,9 @@ NOTICE: Use an access token from 45 minutes or less ago.
                     return;
                 try
                 {
-                    string response = sniperClient.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
+                    WebClient sniperClient2 = new WebClient();
+                    sniperClient2.Headers[HttpRequestHeader.Authorization] = $"Bearer {accessToken}";
+                    string response = sniperClient2.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
                     if (response != string.Empty)
                         Console.WriteLine($"[Info] Got status code of 2XX on a thread.");
                     else
