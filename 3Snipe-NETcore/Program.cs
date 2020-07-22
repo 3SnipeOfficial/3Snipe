@@ -63,7 +63,7 @@ namespace _3Snipe_NETcore
             try
             {
                 string tokenResponse = sniperClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}");
-                accessToken = (string)JObject.Parse(tokenResponse)[accessToken];
+                accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
             } catch {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[Error] The account provided is invalid. Press any key to return to the menu.");
@@ -208,15 +208,15 @@ namespace _3Snipe_NETcore
              */
 
             WebClient sniperClient = new WebClient();
-            Console.WriteLine("Enter your Minecraft account email and press enter: ");
-            string email = Console.ReadLine();
-            Console.WriteLine("Enter your Minecraft account password and press enter: ");
-            string password = Console.ReadLine();
+            Console.WriteLine("Enter your Minecraft account in the format of 'email:password' and press enter: ");
+            string account = Console.ReadLine();
+            string email = account.Split(':')[0];
+            string password = account.Split(':')[1];
             string accessToken = "";
             try
             {
                 string tokenResponse = sniperClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}");
-                accessToken = (string)JObject.Parse(tokenResponse)[accessToken];
+                accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
             }
             catch
             {
