@@ -322,6 +322,7 @@ namespace _3Snipe_NETcore
                 Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(600000));
             }
             catch { }
+            string emailSniped = "";
             void acctThread(object user2)
             {
                 WebClient authClient = new WebClient();
@@ -397,6 +398,7 @@ namespace _3Snipe_NETcore
                             else
                                 Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
                             snipedAlready = true;
+                            emailSniped = user.Email;
                             return;
                         }
                         catch (WebException e)
@@ -444,7 +446,7 @@ namespace _3Snipe_NETcore
             if (snipedAlready)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Success. Set name to " + name + ". Press any key to return to the menu.");
+                Console.WriteLine("Success. Set name to " + name + " on account " + emailSniped + ". Press any key to return to the menu.");
                 Console.ResetColor();
                 Console.ReadKey();
                 Console.Clear();
