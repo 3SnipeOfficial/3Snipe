@@ -4,11 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>_3Snipe_NETcore</RootNamespace>
-    <AssemblyName>3Snipe CORE</AssemblyName>
+    <AssemblyName>3Snipe</AssemblyName>
     <ApplicationIcon>3Snipe Logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Extreme.Net.Core" Version="2.0.3" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
   </ItemGroup>
 
