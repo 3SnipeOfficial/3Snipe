@@ -34,7 +34,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.1";
+        static readonly string vCode = "v1.1.0-beta.8";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -219,13 +219,17 @@ namespace _3Snipe_NETcore
             {
                 threads[i].Start(new ThreadInfo(i));
             }
-            accessToken = "Disposed.";
-            password = "Disposed.";
-            payload = "Disposed.";
+            try
+            {
+                Thread.Sleep(dropTime - DateTime.Now);
+            } catch { }
             try
             {
                 Thread.Sleep(20000);
             } catch { }
+            accessToken = "Disposed.";
+            password = "Disposed.";
+            payload = "Disposed.";
             if (snipedAlready)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
@@ -348,7 +352,7 @@ namespace _3Snipe_NETcore
                 try
                 {
                     Console.WriteLine("[Info] Readying token for usage...");
-                    sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
+                    authClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
                     string tempStr = authClient.DownloadString("https://api.mojang.com/user/security/challenges");
                     if (tempStr == "[]")
                     {
@@ -423,10 +427,14 @@ namespace _3Snipe_NETcore
                 {
                     threads[i].Start(new ThreadInfo(i));
                 }
+                try
+                {
+                    Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(30000));
+                }
+                catch { }
                 accessToken = "Disposed.";
                 user.Password = "Disposed.";
                 payload = "Disposed.";
-                
             }
             var threads2 = new List<Thread>();
             foreach (var account2 in accounts)
