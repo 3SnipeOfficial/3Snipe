@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,6 +9,8 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Data.SqlTypes;
 
 namespace _3Snipe_NETcore
 {
@@ -34,15 +37,78 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.8";
+        //static readonly string vCode = "v1.1.0-beta.8";
+        static readonly string vCode = "v1.1.0-beta.9";
         static object lockObj = new object();
         static bool snipedAlready = false;
+        static readonly string willToLive = null;
+
+
         static void Main(string[] args)
         {
+
+
+
             menu();
         }
         static void branding()
         {
+
+            String userDefinedColor;
+            try { 
+            //Pass the file path and file name to the StreamReader constructor
+            StreamReader sr = new StreamReader("config.txt");
+            //Read the first line of text
+            userDefinedColor = sr.ReadLine();
+                if (userDefinedColor == null) {
+                    userDefinedColor = "Gray";
+                }
+            Console.WriteLine(userDefinedColor);
+            sr.Close();
+        }
+catch(Exception e)
+{
+                Console.WriteLine("Exception: " + e.Message);
+                userDefinedColor = "Gray";
+            }
+finally
+{
+                Console.WriteLine("Executing finally block.");
+                Console.Clear();
+}
+            // AHHHH
+
+
+            string[] splashMsgs = { "Déjà vu!",
+                    "Doesn't use the U-word!",
+                    "doot doot",
+                    "From free range developers!",
+                    "if not ok then return end",
+                    "Now with 10% less fat!",
+                    "sqrt(-1) love you!",
+                    "Multithreaded!",
+                    "Privet Russia!",
+                    "Cough or sneeze into your elbow!",
+                    "Don't skid!",
+                    "MIT Licensed!",
+                    "fastsnipe who?",
+                    ".NET 3.1!",
+                    "200 members!",
+                    "Established 2020!",
+                    "The Work of Notch",
+                    "110813!",
+                    "Tip: to disable this text, run rm -rf  /",
+                    "3name users are not welcome in this realm.",
+                    "alex is best dev"
+                    };
+
+             
+            Random rand = new Random();
+            
+            int index = rand.Next(splashMsgs.Length);
+           
+
+            Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), userDefinedColor, true);
             Console.WriteLine($@"                                                 
 ██████╗ ███████╗███╗   ██╗██╗██████╗ ███████╗
 ╚════██╗██╔════╝████╗  ██║██║██╔══██╗██╔════╝
@@ -52,6 +118,8 @@ namespace _3Snipe_NETcore
 ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚══════╝
 
 {vCode}
+
+{splashMsgs[index]}
 
 ");
         }
@@ -472,12 +540,152 @@ namespace _3Snipe_NETcore
         }
         private static void configure()
         {
-            Console.Clear();
-            Console.WriteLine("Under construction. Press a key to go back.");
-            Console.ReadKey();
-            Console.Clear();
-            return;
+
+            for (; ; )
+            {
+                branding();
+                Console.Clear();
+                Console.WriteLine(@"Tools:
+1) Fun
+2) Back
+");
+                char option = Console.ReadKey().KeyChar;
+                char[] options = { '1', '2' };
+                while (!options.Contains(option))
+                {
+                    Console.Write("\r \r");
+                    option = Console.ReadKey().KeyChar;
+                }
+                switch (option)
+                {
+                    case '1': funOptions(); break;
+                    case '2': Console.Clear(); return;
+                    default: break;
+                }
+            }
         }
+
+
+        private static void funOptions()
+        {
+
+            for (; ; )
+            {
+                branding();
+                Console.Clear();
+                Console.WriteLine(@"Tools:
+1) Colors
+2) Back
+");
+                char option = Console.ReadKey().KeyChar;
+                char[] options = { '1', '2', '3' };
+                while (!options.Contains(option))
+                {
+                    Console.Write("\r \r");
+                    option = Console.ReadKey().KeyChar;
+                }
+                switch (option)
+                {
+                    case '1': colorOptions(); break;
+                    case '2': Console.Clear(); return;
+                    default: break;
+                }
+            }
+        }
+
+
+        private static void colorOptions()
+        {
+            
+            while (69 != 420)
+            {
+                branding();
+                Console.Clear();
+                Console.WriteLine(@"Colors:
+1) dark blue
+2) dark green
+3) dark cyan
+4) dark red
+5) dark purple
+6) dark yellow
+7) gray (default)
+8) dark gray
+9) blue
+a) green (disabled, reserved for success message)
+b) cyan
+c) red (disabled, reserved for failure message)
+d) magenta
+e) yellow
+f) white
+t) Back
+");
+                char option = Console.ReadKey().KeyChar;
+                char[] options = { '1', '2', '3', '4', '5', '6', '7', '8', '9', /*'a',*/ 'b', /*'c',*/ 'd', 'e', 'f', 't' };
+                while (!options.Contains(option))
+                {
+                    Console.Write("\r \r");
+                    option = Console.ReadKey().KeyChar;
+                }
+                switch (option)
+                {
+                    case '1': setColor("DarkBlue"); break;
+                    case '2': setColor("DarkGreen"); break;
+                    case '3': setColor("DarkCyan"); break;
+                    case '4': setColor("DarkRed"); break;
+                    case '5': setColor("DarkMagenta"); break;
+                    case '6': setColor("DarkYellow"); break;
+                    case '7': setColor("Gray"); break;
+                    case '8': setColor("DarkGray"); break;
+                    case '9': setColor("Blue"); break;
+                    case 'a': setColor("Green"); break;
+                    case 'b': setColor("Cyan"); break;
+                    case 'c': setColor("Red"); break;
+                    case 'd': setColor("Magenta"); break;
+                    case 'e': setColor("Yellow"); break;
+                    case 'f': setColor("White"); break;
+                    case 't': Console.Clear(); return;
+                    default: break;
+                }
+                   
+            }
+        }
+
+        private static void setColor(string painIsMyLife)
+        {
+
+            for (; ; )
+            {
+                StreamWriter sw = new StreamWriter("config.txt");
+                
+                
+                sw.WriteLine(painIsMyLife);
+                sw.Close();
+                Console.Clear();
+                Console.WriteLine(@"Color set!
+Please restart the software.
+1) Reinitialize");
+                char option = Console.ReadKey().KeyChar;
+                char[] options = {'1'};
+                while (!options.Contains(option))
+                {
+                    Console.Write("\r \r");
+                    option = Console.ReadKey().KeyChar;
+                }
+                switch (option)
+                {
+                    case '1': { Console.Clear();
+                            menu();
+                            String plsSend;
+                            String Help;
+                            plsSend = "i am hurting. please send food and water i am dying. ";
+                            Help = "tyler has me locked up in this dungeon and won't let me out";
+                            Console.WriteLine(plsSend + Help);
+                              Console.Clear();
+                            return; }
+                }
+            }
+        }
+
         private static void tools()
         {
 
@@ -506,6 +714,9 @@ namespace _3Snipe_NETcore
                 }
             }
         }
+
+
+
         private static void doQuestions()
         {
             /*
