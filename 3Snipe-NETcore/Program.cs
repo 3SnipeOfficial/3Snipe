@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,8 +8,6 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Data.SqlTypes;
 
 namespace _3Snipe_NETcore
 {
@@ -37,78 +34,15 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        //static readonly string vCode = "v1.1.0-beta.8";
         static readonly string vCode = "v1.1.0-beta.9";
         static object lockObj = new object();
         static bool snipedAlready = false;
-        static readonly string willToLive = null;
-
-
         static void Main(string[] args)
         {
-
-
-
             menu();
         }
         static void branding()
         {
-
-            String userDefinedColor;
-            try { 
-            //Pass the file path and file name to the StreamReader constructor
-            StreamReader sr = new StreamReader("config.txt");
-            //Read the first line of text
-            userDefinedColor = sr.ReadLine();
-                if (userDefinedColor == null) {
-                    userDefinedColor = "Gray";
-                }
-            Console.WriteLine(userDefinedColor);
-            sr.Close();
-        }
-catch(Exception e)
-{
-                Console.WriteLine("Exception: " + e.Message);
-                userDefinedColor = "Gray";
-            }
-finally
-{
-                Console.WriteLine("Executing finally block.");
-                Console.Clear();
-}
-            // AHHHH
-
-
-            string[] splashMsgs = { "Déjà vu!",
-                    "Doesn't use the U-word!",
-                    "doot doot",
-                    "From free range developers!",
-                    "if not ok then return end",
-                    "Now with 10% less fat!",
-                    "sqrt(-1) love you!",
-                    "Multithreaded!",
-                    "Privet Russia!",
-                    "Cough or sneeze into your elbow!",
-                    "Don't skid!",
-                    "MIT Licensed!",
-                    "fastsnipe who?",
-                    ".NET 3.1!",
-                    "200 members!",
-                    "Established 2020!",
-                    "The Work of Notch",
-                    "110813!",
-                    "Tip: to disable this text, run rm -rf  /",
-                    "3name users are not welcome in this realm.",
-                    "alex is best dev"
-                    };
-
-             
-            Random rand = new Random();
-            
-            int index = rand.Next(splashMsgs.Length);
-           
-
-            Console.ForegroundColor = (ConsoleColor)Enum.Parse(typeof(ConsoleColor), userDefinedColor, true);
             Console.WriteLine($@"                                                 
 ██████╗ ███████╗███╗   ██╗██╗██████╗ ███████╗
 ╚════██╗██╔════╝████╗  ██║██║██╔══██╗██╔════╝
@@ -118,8 +52,6 @@ finally
 ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝╚═╝     ╚══════╝
 
 {vCode}
-
-{splashMsgs[index]}
 
 ");
         }
@@ -197,10 +129,26 @@ finally
             }
             catch { }
             string accessToken = "";
+            string clientToken = "";
+            void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
+            {
+                try
+                {
+                    WebClient refreshClient = new WebClient();
+                    var temp = refreshClient.UploadString("https://authserver.mojang.com/refresh", $"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}");
+                    accessToken = (string)JObject.Parse(temp)["accessToken"];
+                }
+                catch { }
+            }
+            System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
+            refreshTimer.AutoReset = true;
+            refreshTimer.Elapsed += refreshEvent; 
             try
             {
                 string tokenResponse = sniperClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}");
                 accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
+                clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
+                refreshTimer.Enabled = true;
             } catch {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[Error] The account provided is invalid. Press any key to return to the menu.");
@@ -208,8 +156,8 @@ finally
                 Console.ReadKey();
                 return;
             }
-            string f16 = accessToken.Substring(0, 16);
-            Console.WriteLine($"[Info] Got token. First 16 characters are {f16}");
+            string f16 = accessToken.Split('.')[1].Substring(0, 16);
+            Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
             sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
             string payload = "{'name': '" + name + "', 'password': '" + password + "'}";
             try
@@ -234,9 +182,8 @@ finally
                 return;
             }
             var temp = sniperClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
-            Console.WriteLine(temp);
             userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
-            Console.WriteLine(userUUID);
+            Console.WriteLine(temp);
             List<Thread> threads = new List<Thread>();
             void sniperthread(object info)
             {
@@ -295,6 +242,7 @@ finally
             {
                 Thread.Sleep(20000);
             } catch { }
+            refreshTimer.Enabled = false;
             accessToken = "Disposed.";
             password = "Disposed.";
             payload = "Disposed.";
@@ -397,14 +345,30 @@ finally
             string emailSniped = "";
             void acctThread(object user2)
             {
-                WebClient authClient = new WebClient();
                 UserInfo user = (UserInfo)user2;
                 string accessToken = "";
+                string clientToken = ""; //used for refresh
+                void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
+                {
+                    try
+                    {
+                        WebClient refreshClient = new WebClient();
+                        var temp = refreshClient.UploadString("https://authserver.mojang.com/refresh", $"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}");
+                        accessToken = (string)JObject.Parse(temp)["accessToken"];
+                    }
+                    catch { }
+                }
+                System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
+                refreshTimer.AutoReset = true;
+                refreshTimer.Elapsed += refreshEvent;
+                WebClient authClient = new WebClient();
                 try
                 {
                     string tokenResponse = "";
                     tokenResponse = authClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}");
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
+                    clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
+                    refreshTimer.Enabled = true;
                 }
                 catch
                 {
@@ -414,8 +378,8 @@ finally
                     Console.ReadKey();
                     return;
                 }
-                string f16 = accessToken.Substring(0, 16);
-                Console.WriteLine($"[Info] Got token. First 16 characters are {f16}");
+                string f16 = accessToken.Split('.')[1].Substring(0, 16);
+                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
                 string payload = "{'name': '" + name + "', 'password': '" + user.Password + "'}";
                 try
                 {
@@ -432,9 +396,8 @@ finally
                     }
 
                 }
-                catch (Exception e)
+                catch
                 {
-                    Console.WriteLine(e.Message);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("[Error] Security questions are unanswered (use the tool for this). Continuing execution.");
                     Console.ResetColor();
@@ -442,10 +405,18 @@ finally
                 }
                 string userUUID = "";
                 string temp = "";
-                authClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-                temp = authClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
-                userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
-                
+                try
+                {
+                    temp = authClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
+                    userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
+                    Console.WriteLine(temp);
+                } catch
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("[Error] Failed to get UUID. Continuing execution.");
+                    Console.ResetColor();
+                    return;
+                }
                 List<Thread> threads = new List<Thread>();
                 void sniperthread(object info)
                 {
@@ -486,6 +457,7 @@ finally
                             Console.WriteLine($"[Info] Got status code of {code} on a thread, request number {i}.");
                         }
                     }
+                    refreshTimer.Enabled = false;
                 }
                 for (int i = 0; i < 10; i++)
                 {
@@ -540,152 +512,12 @@ finally
         }
         private static void configure()
         {
-
-            for (; ; )
-            {
-                branding();
-                Console.Clear();
-                Console.WriteLine(@"Tools:
-1) Fun
-2) Back
-");
-                char option = Console.ReadKey().KeyChar;
-                char[] options = { '1', '2' };
-                while (!options.Contains(option))
-                {
-                    Console.Write("\r \r");
-                    option = Console.ReadKey().KeyChar;
-                }
-                switch (option)
-                {
-                    case '1': funOptions(); break;
-                    case '2': Console.Clear(); return;
-                    default: break;
-                }
-            }
+            Console.Clear();
+            Console.WriteLine("Under construction. Press a key to go back.");
+            Console.ReadKey();
+            Console.Clear();
+            return;
         }
-
-
-        private static void funOptions()
-        {
-
-            for (; ; )
-            {
-                branding();
-                Console.Clear();
-                Console.WriteLine(@"Tools:
-1) Colors
-2) Back
-");
-                char option = Console.ReadKey().KeyChar;
-                char[] options = { '1', '2', '3' };
-                while (!options.Contains(option))
-                {
-                    Console.Write("\r \r");
-                    option = Console.ReadKey().KeyChar;
-                }
-                switch (option)
-                {
-                    case '1': colorOptions(); break;
-                    case '2': Console.Clear(); return;
-                    default: break;
-                }
-            }
-        }
-
-
-        private static void colorOptions()
-        {
-            
-            while (69 != 420)
-            {
-                branding();
-                Console.Clear();
-                Console.WriteLine(@"Colors:
-1) dark blue
-2) dark green
-3) dark cyan
-4) dark red
-5) dark purple
-6) dark yellow
-7) gray (default)
-8) dark gray
-9) blue
-a) green (disabled, reserved for success message)
-b) cyan
-c) red (disabled, reserved for failure message)
-d) magenta
-e) yellow
-f) white
-t) Back
-");
-                char option = Console.ReadKey().KeyChar;
-                char[] options = { '1', '2', '3', '4', '5', '6', '7', '8', '9', /*'a',*/ 'b', /*'c',*/ 'd', 'e', 'f', 't' };
-                while (!options.Contains(option))
-                {
-                    Console.Write("\r \r");
-                    option = Console.ReadKey().KeyChar;
-                }
-                switch (option)
-                {
-                    case '1': setColor("DarkBlue"); break;
-                    case '2': setColor("DarkGreen"); break;
-                    case '3': setColor("DarkCyan"); break;
-                    case '4': setColor("DarkRed"); break;
-                    case '5': setColor("DarkMagenta"); break;
-                    case '6': setColor("DarkYellow"); break;
-                    case '7': setColor("Gray"); break;
-                    case '8': setColor("DarkGray"); break;
-                    case '9': setColor("Blue"); break;
-                    case 'a': setColor("Green"); break;
-                    case 'b': setColor("Cyan"); break;
-                    case 'c': setColor("Red"); break;
-                    case 'd': setColor("Magenta"); break;
-                    case 'e': setColor("Yellow"); break;
-                    case 'f': setColor("White"); break;
-                    case 't': Console.Clear(); return;
-                    default: break;
-                }
-                   
-            }
-        }
-
-        private static void setColor(string painIsMyLife)
-        {
-
-            for (; ; )
-            {
-                StreamWriter sw = new StreamWriter("config.txt");
-                
-                
-                sw.WriteLine(painIsMyLife);
-                sw.Close();
-                Console.Clear();
-                Console.WriteLine(@"Color set!
-Please restart the software.
-1) Reinitialize");
-                char option = Console.ReadKey().KeyChar;
-                char[] options = {'1'};
-                while (!options.Contains(option))
-                {
-                    Console.Write("\r \r");
-                    option = Console.ReadKey().KeyChar;
-                }
-                switch (option)
-                {
-                    case '1': { Console.Clear();
-                            menu();
-                            String plsSend;
-                            String Help;
-                            plsSend = "i am hurting. please send food and water i am dying. ";
-                            Help = "tyler has me locked up in this dungeon and won't let me out";
-                            Console.WriteLine(plsSend + Help);
-                              Console.Clear();
-                            return; }
-                }
-            }
-        }
-
         private static void tools()
         {
 
@@ -714,9 +546,6 @@ Please restart the software.
                 }
             }
         }
-
-
-
         private static void doQuestions()
         {
             /*
