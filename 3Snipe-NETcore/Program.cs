@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace _3Snipe_NETcore
 {
@@ -34,7 +36,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.9";
+        static readonly string vCode = "v1.1.0-beta.10";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -55,7 +57,7 @@ namespace _3Snipe_NETcore
 
 ");
         }
-        private static void snipe()
+        private static void Snipe()
         {
             DateTime dropTime;
             Console.Clear();
@@ -97,14 +99,14 @@ namespace _3Snipe_NETcore
             string userUUID = "";
             Console.WriteLine("Enter name to snipe and press enter: ");
             string name = Console.ReadLine();
-            WebClient sniperClient = new WebClient();
-            sniperClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+            HttpClient sniperClient = new HttpClient();
             Console.WriteLine();
             try
             {
-                JObject tempObj = JObject.Parse(sniperClient.DownloadString($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)));
+                var tempRes = sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result;
+                JObject tempObj = JObject.Parse(tempRes);
                 string oldOwnerID = (string)tempObj["id"];
-                JArray tempArr = JArray.Parse(sniperClient.DownloadString($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names"));
+                JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
                 List<int> indexList = new List<int>();
                 for (int i = 0; i < tempArr.Count; i++)
                 {
@@ -114,6 +116,154 @@ namespace _3Snipe_NETcore
                 }
                 int lastIndex = indexList[indexList.Count - 1] + 1;
                 dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
+                try
+                {
+                    Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(600000));
+                }
+                catch { }
+                string accessToken = "";
+                string clientToken = "";
+                void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
+                {
+                    try
+                    {
+                        HttpClient refreshClient = new HttpClient();
+                        var content = new StringContent($"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}", Encoding.UTF8, "application/json");
+                        var temp = refreshClient.PostAsync("https://authserver.mojang.com/refresh", content).Result.Content.ReadAsStringAsync().Result;
+                        accessToken = (string)JObject.Parse(temp)["accessToken"];
+                    }
+                    catch { }
+                }
+                System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
+                refreshTimer.AutoReset = true;
+                refreshTimer.Elapsed += refreshEvent;
+                try
+                {
+                    var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}", Encoding.UTF8, "application/json");
+                    var tokenResponse = sniperClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
+                    accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
+                    clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
+                    refreshTimer.Enabled = true;
+                }
+                catch
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("[Error] The account provided is invalid. Press any key to return to the menu.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+                string f16 = accessToken.Split('.')[1].Substring(0, 16);
+                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
+                sniperClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  accessToken);
+                var payload = new StringContent("{'name': '" + name + "', 'password': '" + password + "'}", Encoding.UTF8,  "application/json");
+                try
+                {
+                    Console.WriteLine("[Info] Readying token for usage...");
+                    string tempStr = sniperClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
+                    if (tempStr == "[]")
+                    {
+                        Console.WriteLine("[Info] Readied token for usage.");
+                    }
+                    else
+                    {
+                        throw new Exception("Questions are unanswered.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("[Error] Security questions are unanswered (use the tool for this). Press any key to return to the menu.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    return;
+                }
+                var temp = sniperClient.GetStringAsync("https://api.mojang.com/user/profiles/agent/minecraft").Result;
+                userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
+                Console.WriteLine(temp);
+                List<Thread> threads = new List<Thread>();
+                void sniperthread(object info)
+                {
+                    int delay = ((ThreadInfo)info).ThreadID;
+                    HttpClient sniperClient2 = new HttpClient();
+                    sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    try
+                    {
+                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(25) + TimeSpan.FromMilliseconds(delay * 5));
+                    }
+                    catch { }
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (snipedAlready)
+                            return;
+                        try
+                        {
+                            var response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result;
+                            if (response.StatusCode == HttpStatusCode.NoContent)
+                                Console.WriteLine($"[Info] Got status code of 2XX on a thread, request number {i}.");
+                            else if (response.IsSuccessStatusCode)
+                                Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
+                            else
+                                Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
+                            snipedAlready = true;
+                            return;
+                        }
+                        catch (WebException e)
+                        {
+                            HttpStatusCode code = ((HttpWebResponse)e.Response).StatusCode;
+                            if (code == HttpStatusCode.NoContent)
+                            {
+                                snipedAlready = true;
+                            }
+                            else
+                            {
+                            }
+                            
+                        }
+                    }
+                }
+                for (int i = 0; i < 10; i++)
+                {
+                    threads.Add(new Thread(new ParameterizedThreadStart(sniperthread)));
+                }
+
+                for (int i = 0; i < 10; i++)
+                {
+                    threads[i].Start(new ThreadInfo(i));
+                }
+                try
+                {
+                    Thread.Sleep(dropTime - DateTime.Now);
+                }
+                catch { }
+                try
+                {
+                    Thread.Sleep(20000);
+                }
+                catch { }
+                refreshTimer.Enabled = false;
+                accessToken = "Disposed.";
+                password = "Disposed.";
+                payload = null;
+                if (snipedAlready)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Success. Set name to " + name + ". Press any key to return to the menu.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    Console.Clear();
+                    return;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Failed snipe. Press any key to return to the menu.");
+                    Console.ResetColor();
+                    Console.ReadKey();
+                    Console.Clear();
+                    return;
+                }
             }
             catch
             {
@@ -121,147 +271,6 @@ namespace _3Snipe_NETcore
                 Console.WriteLine("[Error] This name is not dropping or has already dropped. Press any key to return to the menu.");
                 Console.ResetColor();
                 Console.ReadKey();
-                return;
-            }
-            try
-            {
-                Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(600000));
-            }
-            catch { }
-            string accessToken = "";
-            string clientToken = "";
-            void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
-            {
-                try
-                {
-                    WebClient refreshClient = new WebClient();
-                    var temp = refreshClient.UploadString("https://authserver.mojang.com/refresh", $"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}");
-                    accessToken = (string)JObject.Parse(temp)["accessToken"];
-                }
-                catch { }
-            }
-            System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
-            refreshTimer.AutoReset = true;
-            refreshTimer.Elapsed += refreshEvent; 
-            try
-            {
-                string tokenResponse = sniperClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}");
-                accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
-                clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
-                refreshTimer.Enabled = true;
-            } catch {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[Error] The account provided is invalid. Press any key to return to the menu.");
-                Console.ResetColor();
-                Console.ReadKey();
-                return;
-            }
-            string f16 = accessToken.Split('.')[1].Substring(0, 16);
-            Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
-            sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-            string payload = "{'name': '" + name + "', 'password': '" + password + "'}";
-            try
-            {
-                Console.WriteLine("[Info] Readying token for usage...");
-                string tempStr = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
-                if (tempStr == "[]")
-                {
-                    Console.WriteLine("[Info] Readied token for usage.");
-                } else
-                {
-                    throw new Exception("Questions are unanswered.");
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[Error] Security questions are unanswered (use the tool for this). Press any key to return to the menu.");
-                Console.ResetColor();
-                Console.ReadKey();
-                return;
-            }
-            var temp = sniperClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
-            userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
-            Console.WriteLine(temp);
-            List<Thread> threads = new List<Thread>();
-            void sniperthread(object info)
-            {
-                int delay = ((ThreadInfo)info).ThreadID;
-                WebClient sniperClient2 = new WebClient();
-                sniperClient2.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-                sniperClient2.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
-                Console.WriteLine(sniperClient2.Headers);
-                try
-                {
-                    Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(25) + TimeSpan.FromMilliseconds(delay * 5));
-                }
-                catch { }
-                for (int i = 0; i < 4; i++)
-                {
-                    if (snipedAlready)
-                        return;
-                    try
-                    {
-                        string response = sniperClient2.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
-                        if (response != string.Empty)
-                            Console.WriteLine($"[Info] Got status code of 2XX on a thread, request number {i}.");
-                        else
-                            Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
-                        snipedAlready = true;
-                        return;
-                    }
-                    catch (WebException e)
-                    {
-                        HttpStatusCode code = ((HttpWebResponse)e.Response).StatusCode;
-                        if (code == HttpStatusCode.NoContent)
-                        {
-                            snipedAlready = true;
-                        }
-                        else
-                        {
-                        }
-                        Console.WriteLine($"[Info] Got status code of {code} on a thread, request number {i}.");
-                    }
-                }
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                threads.Add(new Thread(new ParameterizedThreadStart(sniperthread)));
-            }
-            
-            for (int i = 0; i < 10; i++)
-            {
-                threads[i].Start(new ThreadInfo(i));
-            }
-            try
-            {
-                Thread.Sleep(dropTime - DateTime.Now);
-            } catch { }
-            try
-            {
-                Thread.Sleep(20000);
-            } catch { }
-            refreshTimer.Enabled = false;
-            accessToken = "Disposed.";
-            password = "Disposed.";
-            payload = "Disposed.";
-            if (snipedAlready)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Success. Set name to " + name + ". Press any key to return to the menu.");
-                Console.ResetColor();
-                Console.ReadKey();
-                Console.Clear();
-                return;
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed snipe. Press any key to return to the menu.");
-                Console.ResetColor();
-                Console.ReadKey();
-                Console.Clear();
                 return;
             }
         }
@@ -281,7 +290,7 @@ namespace _3Snipe_NETcore
                     key = Console.ReadKey(true);
                     while (key.Key != ConsoleKey.Enter)
                     {
-                        
+
                         if (key.Key != ConsoleKey.Backspace)
                         {
                             account += key.KeyChar;
@@ -311,14 +320,13 @@ namespace _3Snipe_NETcore
             Console.Clear();
             Console.WriteLine("Enter name to snipe and press enter: ");
             string name = Console.ReadLine();
-            WebClient sniperClient = new WebClient();
-            sniperClient.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+            HttpClient sniperClient = new HttpClient();
             Console.WriteLine();
             try
             {
-                JObject tempObj = JObject.Parse(sniperClient.DownloadString($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)));
+                JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
                 string oldOwnerID = (string)tempObj["id"];
-                JArray tempArr = JArray.Parse(sniperClient.DownloadString($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names"));
+                JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
                 List<int> indexList = new List<int>();
                 for (int i = 0; i < tempArr.Count; i++)
                 {
@@ -352,8 +360,9 @@ namespace _3Snipe_NETcore
                 {
                     try
                     {
-                        WebClient refreshClient = new WebClient();
-                        var temp = refreshClient.UploadString("https://authserver.mojang.com/refresh", $"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}");
+                        HttpClient refreshClient = new HttpClient();
+                        var content = new StringContent($"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}", Encoding.UTF8, "application/json");
+                        var temp = refreshClient.PostAsync("https://authserver.mojang.com/refresh", content).Result.Content.ReadAsStringAsync().Result;
                         accessToken = (string)JObject.Parse(temp)["accessToken"];
                     }
                     catch { }
@@ -361,11 +370,12 @@ namespace _3Snipe_NETcore
                 System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
                 refreshTimer.AutoReset = true;
                 refreshTimer.Elapsed += refreshEvent;
-                WebClient authClient = new WebClient();
+                HttpClient authClient = new HttpClient();
                 try
                 {
+                    var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}", Encoding.UTF8, "application/json");
                     string tokenResponse = "";
-                    tokenResponse = authClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}");
+                    tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
                     clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
                     refreshTimer.Enabled = true;
@@ -380,15 +390,15 @@ namespace _3Snipe_NETcore
                 }
                 string f16 = accessToken.Split('.')[1].Substring(0, 16);
                 Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
-                string payload = "{'name': '" + name + "', 'password': '" + user.Password + "'}";
+                var payload = new StringContent("{'name': '" + name + "', 'password': '" + user.Password + "'}", Encoding.UTF8, "application/json");
                 try
                 {
                     Console.WriteLine("[Info] Readying token for usage...");
-                    authClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-                    string tempStr = authClient.DownloadString("https://api.mojang.com/user/security/challenges");
+                    authClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    string tempStr = authClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
                     if (tempStr == "[]")
                     {
-                            Console.WriteLine("[Info] Readied token for usage.");
+                        Console.WriteLine("[Info] Readied token for usage.");
                     }
                     else
                     {
@@ -407,10 +417,11 @@ namespace _3Snipe_NETcore
                 string temp = "";
                 try
                 {
-                    temp = authClient.DownloadString("https://api.mojang.com/user/profiles/agent/minecraft");
+                    temp = authClient.GetStringAsync("https://api.mojang.com/user/profiles/agent/minecraft").Result;
                     userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
                     Console.WriteLine(temp);
-                } catch
+                }
+                catch
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("[Error] Failed to get UUID. Continuing execution.");
@@ -421,9 +432,8 @@ namespace _3Snipe_NETcore
                 void sniperthread(object info)
                 {
                     int delay = ((ThreadInfo)info).ThreadID;
-                    WebClient sniperClient2 = new WebClient();
-                    sniperClient2.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-                    sniperClient2.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+                    HttpClient sniperClient2 = new HttpClient();
+                    sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     try
                     {
                         Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2.5 * accounts.Count) + TimeSpan.FromMilliseconds(delay * 5));
@@ -435,7 +445,7 @@ namespace _3Snipe_NETcore
                             return;
                         try
                         {
-                            string response = sniperClient2.UploadString("https://api.mojang.com/user/profile/" + userUUID + "/name", payload);
+                            string response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result.Content.ReadAsStringAsync().Result;
                             if (response != string.Empty)
                                 Console.WriteLine($"[Info] Got status code of 2XX on a thread, request number {i}.");
                             else
@@ -474,7 +484,7 @@ namespace _3Snipe_NETcore
                 catch { }
                 accessToken = "Disposed.";
                 user.Password = "Disposed.";
-                payload = "Disposed.";
+                payload = null;
             }
             var threads2 = new List<Thread>();
             foreach (var account2 in accounts)
@@ -619,14 +629,15 @@ namespace _3Snipe_NETcore
                 {
                     Console.WriteLine("[Info] Questions not needed. Press any key to return to the menu.");
                     Console.ReadKey();
-                    return; 
+                    return;
                 }
             }
             catch { }
             Console.WriteLine("[Info] Getting questions now.");
             List<string> questions = new List<string>();
             List<int> ids = new List<int>();
-            try {
+            try
+            {
                 string tempqs = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
                 JArray qarr = JArray.Parse(tempqs);
                 for (int i = 0; i < 3; i++)
@@ -634,7 +645,9 @@ namespace _3Snipe_NETcore
                     questions.Add((string)qarr[i]["question"]["question"]);
                     ids.Add((int)qarr[i]["answer"]["id"]);
                 }
-            } catch { 
+            }
+            catch
+            {
                 try
                 {
                     string tempqs = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
@@ -645,7 +658,8 @@ namespace _3Snipe_NETcore
                         return;
                     }
                     else { throw new Exception("Questions needed, but response invalid."); }
-                } catch
+                }
+                catch
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("[Error] Questions failed to fetch. Press any key to return to the menu.");
@@ -667,7 +681,8 @@ namespace _3Snipe_NETcore
                 sniperClient.UploadString("https://api.mojang.com/user/security/location", $"[{{\"id\": {ids[0]}, \"answer\": \"{a1}\"}}, {{\"id\": {ids[1]}, \"answer\": \"{a2}\"}}, {{\"id\": {ids[2]}, \"answer\": \"{a3}\"}}]");
                 Console.WriteLine("[Info] Questions answered successfully. Press any key to return to the menu.");
                 Console.ReadKey();
-            } catch
+            }
+            catch
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("[Error] At least one answer was wrong. Press any key to return to the menu.");
@@ -697,7 +712,7 @@ Menu:
                 }
                 switch (option)
                 {
-                    case '1': snipe(); break;
+                    case '1': Snipe(); break;
                     case '2': configure(); break;
                     case '3': tools(); break;
                     case '4': System.Environment.Exit(0); break;
