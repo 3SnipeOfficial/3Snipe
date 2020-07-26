@@ -36,7 +36,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.10";
+        static readonly string vCode = "v1.1.0-beta.12";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -118,32 +118,19 @@ namespace _3Snipe_NETcore
                 dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
                 try
                 {
-                    Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(600000));
+                    Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(30000));
                 }
                 catch { }
                 string accessToken = "";
                 string clientToken = "";
-                void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
-                {
-                    try
-                    {
-                        HttpClient refreshClient = new HttpClient();
-                        var content = new StringContent($"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}", Encoding.UTF8, "application/json");
-                        var temp = refreshClient.PostAsync("https://authserver.mojang.com/refresh", content).Result.Content.ReadAsStringAsync().Result;
-                        accessToken = (string)JObject.Parse(temp)["accessToken"];
-                    }
-                    catch { }
-                }
-                System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
-                refreshTimer.AutoReset = true;
-                refreshTimer.Elapsed += refreshEvent;
+                string f16 = "";
                 try
                 {
                     var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}", Encoding.UTF8, "application/json");
                     var tokenResponse = sniperClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
                     clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
-                    refreshTimer.Enabled = true;
+                    f16 = accessToken.Split('.')[1].Substring(0, 16);
                 }
                 catch
                 {
@@ -153,10 +140,9 @@ namespace _3Snipe_NETcore
                     Console.ReadKey();
                     return;
                 }
-                string f16 = accessToken.Split('.')[1].Substring(0, 16);
                 Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
                 sniperClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  accessToken);
-                var payload = new StringContent("{'name': '" + name + "', 'password': '" + password + "'}", Encoding.UTF8,  "application/json");
+                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + password + "\"}", Encoding.UTF8,  "application/json");
                 try
                 {
                     Console.WriteLine("[Info] Readying token for usage...");
@@ -190,7 +176,7 @@ namespace _3Snipe_NETcore
                     sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     try
                     {
-                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(25) + TimeSpan.FromMilliseconds(delay * 5));
+                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(500) + TimeSpan.FromMilliseconds(delay * 5));
                     }
                     catch { }
                     for (int i = 0; i < 4; i++)
@@ -201,13 +187,14 @@ namespace _3Snipe_NETcore
                         {
                             var response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result;
                             if (response.StatusCode == HttpStatusCode.NoContent)
+                            {
                                 Console.WriteLine($"[Info] Got status code of 2XX on a thread, request number {i}.");
+                                snipedAlready = true;
+                            }
                             else if (response.IsSuccessStatusCode)
                                 Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
                             else
                                 Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
-                            snipedAlready = true;
-                            return;
                         }
                         catch (WebException e)
                         {
@@ -223,12 +210,12 @@ namespace _3Snipe_NETcore
                         }
                     }
                 }
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 25; i++)
                 {
                     threads.Add(new Thread(new ParameterizedThreadStart(sniperthread)));
                 }
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 25; i++)
                 {
                     threads[i].Start(new ThreadInfo(i));
                 }
@@ -242,7 +229,6 @@ namespace _3Snipe_NETcore
                     Thread.Sleep(20000);
                 }
                 catch { }
-                refreshTimer.Enabled = false;
                 accessToken = "Disposed.";
                 password = "Disposed.";
                 payload = null;
@@ -347,7 +333,7 @@ namespace _3Snipe_NETcore
             }
             try
             {
-                Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(600000));
+                Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(30000));
             }
             catch { }
             string emailSniped = "";
@@ -356,20 +342,7 @@ namespace _3Snipe_NETcore
                 UserInfo user = (UserInfo)user2;
                 string accessToken = "";
                 string clientToken = ""; //used for refresh
-                void refreshEvent(Object source, System.Timers.ElapsedEventArgs e)
-                {
-                    try
-                    {
-                        HttpClient refreshClient = new HttpClient();
-                        var content = new StringContent($"{{\"accessToken\": \"{accessToken}\", \"clientToken\": \"{clientToken}\"}}", Encoding.UTF8, "application/json");
-                        var temp = refreshClient.PostAsync("https://authserver.mojang.com/refresh", content).Result.Content.ReadAsStringAsync().Result;
-                        accessToken = (string)JObject.Parse(temp)["accessToken"];
-                    }
-                    catch { }
-                }
-                System.Timers.Timer refreshTimer = new System.Timers.Timer(50000);
-                refreshTimer.AutoReset = true;
-                refreshTimer.Elapsed += refreshEvent;
+                string f16 = "";
                 HttpClient authClient = new HttpClient();
                 try
                 {
@@ -378,7 +351,7 @@ namespace _3Snipe_NETcore
                     tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
                     clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
-                    refreshTimer.Enabled = true;
+                    f16 = accessToken.Split('.')[1].Substring(0, 16);
                 }
                 catch
                 {
@@ -388,9 +361,8 @@ namespace _3Snipe_NETcore
                     Console.ReadKey();
                     return;
                 }
-                string f16 = accessToken.Split('.')[1].Substring(0, 16);
                 Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
-                var payload = new StringContent("{'name': '" + name + "', 'password': '" + user.Password + "'}", Encoding.UTF8, "application/json");
+                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + user.Password + "\"}", Encoding.UTF8, "application/json");
                 try
                 {
                     Console.WriteLine("[Info] Readying token for usage...");
@@ -436,7 +408,7 @@ namespace _3Snipe_NETcore
                     sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     try
                     {
-                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2.5 * accounts.Count) + TimeSpan.FromMilliseconds(delay * 5));
+                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(500) + TimeSpan.FromMilliseconds(delay * 5));
                     }
                     catch { }
                     for (int i = 0; i < 4; i++)
@@ -445,14 +417,17 @@ namespace _3Snipe_NETcore
                             return;
                         try
                         {
-                            string response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result.Content.ReadAsStringAsync().Result;
-                            if (response != string.Empty)
+                            var response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result;
+                            if (response.StatusCode == HttpStatusCode.NoContent)
+                            {
                                 Console.WriteLine($"[Info] Got status code of 2XX on a thread, request number {i}.");
-                            else
+                                snipedAlready = true;
+                                emailSniped = user.Email;
+                            }
+                            else if (response.IsSuccessStatusCode)
                                 Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
-                            snipedAlready = true;
-                            emailSniped = user.Email;
-                            return;
+                            else
+                                Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
                         }
                         catch (WebException e)
                         {
@@ -467,7 +442,6 @@ namespace _3Snipe_NETcore
                             Console.WriteLine($"[Info] Got status code of {code} on a thread, request number {i}.");
                         }
                     }
-                    refreshTimer.Enabled = false;
                 }
                 for (int i = 0; i < 10; i++)
                 {
