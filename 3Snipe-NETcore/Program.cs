@@ -36,7 +36,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.12";
+        static readonly string vCode = "v1.1.0-beta.13";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -153,7 +153,7 @@ namespace _3Snipe_NETcore
                     }
                     else
                     {
-                        throw new Exception("Questions are unanswered.");
+                        Console.WriteLine("[Info] Readied token for usage.");
                     }
                 }
                 catch (Exception e)
@@ -374,7 +374,7 @@ namespace _3Snipe_NETcore
                     }
                     else
                     {
-                        throw new Exception("Questions are unanswered.");
+                        Console.WriteLine("[Info] Readied token for usage.");
                     }
 
                 }
