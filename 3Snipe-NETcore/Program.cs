@@ -36,7 +36,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0-beta.13";
+        static readonly string vCode = "v1.1.0";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -145,16 +145,8 @@ namespace _3Snipe_NETcore
                 var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + password + "\"}", Encoding.UTF8,  "application/json");
                 try
                 {
-                    Console.WriteLine("[Info] Readying token for usage...");
                     string tempStr = sniperClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
-                    if (tempStr == "[]")
-                    {
-                        Console.WriteLine("[Info] Readied token for usage.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("[Info] Readied token for usage.");
-                    }
+                    Console.WriteLine("[Info] Readied token for usage.");
                 }
                 catch (Exception e)
                 {
@@ -167,7 +159,6 @@ namespace _3Snipe_NETcore
                 }
                 var temp = sniperClient.GetStringAsync("https://api.mojang.com/user/profiles/agent/minecraft").Result;
                 userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
-                Console.WriteLine(temp);
                 List<Thread> threads = new List<Thread>();
                 void sniperthread(object info)
                 {
@@ -176,7 +167,7 @@ namespace _3Snipe_NETcore
                     sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     try
                     {
-                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(500) + TimeSpan.FromMilliseconds(delay * 5));
+                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(14) + TimeSpan.FromMilliseconds(delay * 5));
                     }
                     catch { }
                     for (int i = 0; i < 4; i++)
@@ -368,14 +359,7 @@ namespace _3Snipe_NETcore
                     Console.WriteLine("[Info] Readying token for usage...");
                     authClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     string tempStr = authClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
-                    if (tempStr == "[]")
-                    {
-                        Console.WriteLine("[Info] Readied token for usage.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("[Info] Readied token for usage.");
-                    }
+                    Console.WriteLine("[Info] Readied token for usage.");
 
                 }
                 catch
