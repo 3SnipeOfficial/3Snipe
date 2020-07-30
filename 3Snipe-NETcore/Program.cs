@@ -37,9 +37,8 @@ namespace _3Snipe_NETcore
     class Program
     {
         static readonly string vCode = "v1.1.0";
-        static object lockObj = new object();
-        static bool snipedAlready = false;
-        static void Main(string[] args)
+        static bool snipedAlready;
+        static void Main()
         {
             menu();
         }
@@ -61,8 +60,8 @@ namespace _3Snipe_NETcore
         {
             DateTime dropTime;
             Console.Clear();
-            string email = "";
-            string password = "";
+            string email;
+            string password;
             try
             {
                 string account = "";
@@ -98,39 +97,36 @@ namespace _3Snipe_NETcore
             Console.Clear();
             string userUUID = "";
             Console.WriteLine("Enter name to snipe and press enter: ");
-            string name = Console.ReadLine();
+            string wantedName = Console.ReadLine();
             HttpClient sniperClient = new HttpClient();
             Console.WriteLine();
             try
             {
-                var tempRes = sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result;
-                JObject tempObj = JObject.Parse(tempRes);
-                string oldOwnerID = (string)tempObj["id"];
-                JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
+                JObject oldOwner = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + wantedName + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
+                string oldOwnerID = (string)oldOwner["id"];
+                JArray oldOwnerNameHist = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
                 List<int> indexList = new List<int>();
-                for (int i = 0; i < tempArr.Count; i++)
+                for (int i = 0; i < oldOwnerNameHist.Count; i++)
                 {
-                    string name2 = (string)tempArr[i]["name"];
-                    if (name.ToLower() == name2.ToLower())
+                    string nameInHist = (string)oldOwnerNameHist[i]["name"];
+                    if (wantedName.ToLower() == nameInHist.ToLower())
                         indexList.Add(i);
                 }
                 int lastIndex = indexList[indexList.Count - 1] + 1;
-                dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
+                dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)oldOwnerNameHist[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
                 try
                 {
                     Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(30000));
                 }
                 catch { }
-                string accessToken = "";
-                string clientToken = "";
-                string f16 = "";
+                string accessToken;
+                string accessTokenCensored;
                 try
                 {
                     var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}", Encoding.UTF8, "application/json");
                     var tokenResponse = sniperClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
-                    clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
-                    f16 = accessToken.Split('.')[1].Substring(0, 16);
+                    accessTokenCensored = accessToken.Split('.')[1].Substring(0, 16);
                 }
                 catch
                 {
@@ -140,9 +136,9 @@ namespace _3Snipe_NETcore
                     Console.ReadKey();
                     return;
                 }
-                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
+                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {accessTokenCensored}");
                 sniperClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  accessToken);
-                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + password + "\"}", Encoding.UTF8,  "application/json");
+                var payload = new StringContent("{\"name\": \"" + wantedName + "\", \"password\": \"" + password + "\"}", Encoding.UTF8,  "application/json");
                 try
                 {
                     string tempStr = sniperClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
@@ -160,7 +156,7 @@ namespace _3Snipe_NETcore
                 var temp = sniperClient.GetStringAsync("https://api.mojang.com/user/profiles/agent/minecraft").Result;
                 userUUID = (string)JObject.Parse(temp.Substring(1, temp.Length - 2))["id"];
                 List<Thread> threads = new List<Thread>();
-                void sniperthread(object info)
+                void sniperThread(object info)
                 {
                     int delay = ((ThreadInfo)info).ThreadID;
                     HttpClient sniperClient2 = new HttpClient();
@@ -194,16 +190,12 @@ namespace _3Snipe_NETcore
                             {
                                 snipedAlready = true;
                             }
-                            else
-                            {
-                            }
-                            
                         }
                     }
                 }
                 for (int i = 0; i < 25; i++)
                 {
-                    threads.Add(new Thread(new ParameterizedThreadStart(sniperthread)));
+                    threads.Add(new Thread(new ParameterizedThreadStart(sniperThread)));
                 }
 
                 for (int i = 0; i < 25; i++)
@@ -221,16 +213,14 @@ namespace _3Snipe_NETcore
                 }
                 catch { }
                 accessToken = "Disposed.";
-                password = "Disposed.";
                 payload = null;
                 if (snipedAlready)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Success. Set name to " + name + ". Press any key to return to the menu.");
+                    Console.WriteLine("Success. Set name to " + wantedName + ". Press any key to return to the menu.");
                     Console.ResetColor();
                     Console.ReadKey();
                     Console.Clear();
-                    return;
                 }
                 else
                 {
@@ -239,7 +229,6 @@ namespace _3Snipe_NETcore
                     Console.ResetColor();
                     Console.ReadKey();
                     Console.Clear();
-                    return;
                 }
             }
             catch
@@ -248,7 +237,6 @@ namespace _3Snipe_NETcore
                 Console.WriteLine("[Error] This name is not dropping or has already dropped. Press any key to return to the menu.");
                 Console.ResetColor();
                 Console.ReadKey();
-                return;
             }
         }
         private static void mutliAcctSnipe()
@@ -256,7 +244,7 @@ namespace _3Snipe_NETcore
             DateTime dropTime;
             List<UserInfo> accounts = new List<UserInfo>();
             Console.Clear();
-            string account = "";
+            string account;
             do
             {
                 try
@@ -296,23 +284,23 @@ namespace _3Snipe_NETcore
             } while (account != "");
             Console.Clear();
             Console.WriteLine("Enter name to snipe and press enter: ");
-            string name = Console.ReadLine();
+            string wantedName = Console.ReadLine();
             HttpClient sniperClient = new HttpClient();
             Console.WriteLine();
             try
             {
-                JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
-                string oldOwnerID = (string)tempObj["id"];
-                JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
+                JObject oldOwner = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + wantedName + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
+                string oldOwnerID = (string)oldOwner["id"];
+                JArray oldOwnerNameHist = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
                 List<int> indexList = new List<int>();
-                for (int i = 0; i < tempArr.Count; i++)
+                for (int i = 0; i < oldOwnerNameHist.Count; i++)
                 {
-                    string name2 = (string)tempArr[i]["name"];
-                    if (name.ToLower() == name2.ToLower())
+                    string nameInHist = (string)oldOwnerNameHist[i]["name"];
+                    if (wantedName.ToLower() == nameInHist.ToLower())
                         indexList.Add(i);
                 }
                 int lastIndex = indexList[indexList.Count - 1] + 1;
-                dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
+                dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)oldOwnerNameHist[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
             }
             catch
             {
@@ -331,18 +319,17 @@ namespace _3Snipe_NETcore
             void acctThread(object user2)
             {
                 UserInfo user = (UserInfo)user2;
-                string accessToken = "";
+                string accessToken;
                 string clientToken = ""; //used for refresh
-                string f16 = "";
+                string accessTokenCensored;
                 HttpClient authClient = new HttpClient();
                 try
                 {
                     var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}", Encoding.UTF8, "application/json");
-                    string tokenResponse = "";
+                    string tokenResponse;
                     tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
                     accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
-                    clientToken = (string)JObject.Parse(tokenResponse)["clientToken"];
-                    f16 = accessToken.Split('.')[1].Substring(0, 16);
+                    accessTokenCensored = accessToken.Split('.')[1].Substring(0, 16);
                 }
                 catch
                 {
@@ -352,8 +339,8 @@ namespace _3Snipe_NETcore
                     Console.ReadKey();
                     return;
                 }
-                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
-                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + user.Password + "\"}", Encoding.UTF8, "application/json");
+                Console.WriteLine($"[Info] Got token. First 16 characters of middle are {accessTokenCensored}");
+                var payload = new StringContent("{\"name\": \"" + wantedName + "\", \"password\": \"" + user.Password + "\"}", Encoding.UTF8, "application/json");
                 try
                 {
                     Console.WriteLine("[Info] Readying token for usage...");
@@ -369,8 +356,8 @@ namespace _3Snipe_NETcore
                     Console.ResetColor();
                     return;
                 }
-                string userUUID = "";
-                string temp = "";
+                string userUUID;
+                string temp;
                 try
                 {
                     temp = authClient.GetStringAsync("https://api.mojang.com/user/profiles/agent/minecraft").Result;
@@ -420,9 +407,6 @@ namespace _3Snipe_NETcore
                             {
                                 snipedAlready = true;
                             }
-                            else
-                            {
-                            }
                             Console.WriteLine($"[Info] Got status code of {code} on a thread, request number {i}.");
                         }
                     }
@@ -462,11 +446,10 @@ namespace _3Snipe_NETcore
             if (snipedAlready)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Success. Set name to " + name + " on account " + emailSniped + ". Press any key to return to the menu.");
+                Console.WriteLine("Success. Set name to " + wantedName + " on account " + emailSniped + ". Press any key to return to the menu.");
                 Console.ResetColor();
                 Console.ReadKey();
                 Console.Clear();
-                return;
             }
             else
             {
@@ -475,7 +458,6 @@ namespace _3Snipe_NETcore
                 Console.ResetColor();
                 Console.ReadKey();
                 Console.Clear();
-                return;
             }
         }
         private static void configure()
@@ -484,7 +466,6 @@ namespace _3Snipe_NETcore
             Console.WriteLine("Under construction. Press a key to go back.");
             Console.ReadKey();
             Console.Clear();
-            return;
         }
         private static void tools()
         {
@@ -510,7 +491,6 @@ namespace _3Snipe_NETcore
                     case '1': doQuestions(); break;
                     case '2': mutliAcctSnipe(); break;
                     case '3': Console.Clear(); return;
-                    default: break;
                 }
             }
         }
@@ -577,8 +557,8 @@ namespace _3Snipe_NETcore
                 return;
             }
             Console.Clear();
-            string f16 = accessToken.Substring(0, 16);
-            Console.WriteLine($"[Info] Got token. First 16 characters are {f16}");
+            string accessTokenCensored = accessToken.Substring(0, 16);
+            Console.WriteLine($"[Info] Got token. First 16 characters are {accessTokenCensored}");
             sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
             try
             {
@@ -615,7 +595,7 @@ namespace _3Snipe_NETcore
                         Console.ReadKey();
                         return;
                     }
-                    else { throw new Exception("Questions needed, but response invalid."); }
+                    throw new Exception("Questions needed, but response invalid.");
                 }
                 catch
                 {
@@ -674,7 +654,6 @@ Menu:
                     case '2': configure(); break;
                     case '3': tools(); break;
                     case '4': System.Environment.Exit(0); break;
-                    default: break;
                 }
                 snipedAlready = false;
             }
