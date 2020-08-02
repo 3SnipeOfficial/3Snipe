@@ -36,7 +36,7 @@ namespace _3Snipe_NETcore
     }
     class Program
     {
-        static readonly string vCode = "v1.1.0";
+        static readonly string vCode = "v1.1.1";
         static object lockObj = new object();
         static bool snipedAlready = false;
         static void Main(string[] args)
@@ -141,8 +141,8 @@ namespace _3Snipe_NETcore
                     return;
                 }
                 Console.WriteLine($"[Info] Got token. First 16 characters of middle are {f16}");
-                sniperClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",  accessToken);
-                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + password + "\"}", Encoding.UTF8,  "application/json");
+                sniperClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                var payload = new StringContent("{\"name\": \"" + name + "\", \"password\": \"" + password + "\"}", Encoding.UTF8, "application/json");
                 try
                 {
                     string tempStr = sniperClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
@@ -197,7 +197,7 @@ namespace _3Snipe_NETcore
                             else
                             {
                             }
-                            
+
                         }
                     }
                 }
@@ -392,7 +392,7 @@ namespace _3Snipe_NETcore
                     sniperClient2.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
                     try
                     {
-                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(500) + TimeSpan.FromMilliseconds(delay * 5));
+                        Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 5));
                     }
                     catch { }
                     for (int i = 0; i < 4; i++)
