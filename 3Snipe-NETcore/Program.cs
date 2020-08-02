@@ -99,6 +99,7 @@ namespace _3Snipe_NETcore
             string userUUID = "";
             Console.WriteLine("Enter name to snipe and press enter: ");
             string name = Console.ReadLine();
+            Console.WriteLine("[Info] Snipe started. Don't close this window!");
             HttpClient sniperClient = new HttpClient();
             Console.WriteLine();
             try
