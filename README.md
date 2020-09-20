@@ -2,14 +2,14 @@
 The official 3Snipe repository that contains the source code and documentation.
 
 ## What version of .NET core do I need?
-You need .NET core 3.1, downloadable at .
+You need .NET core 3.1, downloadable at https://dotnet.microsoft.com/download/dotnet-core/3.1.
 
 ## Where do I download?
 It depends on what platform.
+
 [Windows x64](https://ci.appveyor.com/api/projects/tygamer1to7/3snipe/artifacts/bin/win-x64.zip) 
 
 [Windows x86](https://ci.appveyor.com/api/projects/tygamer1to7/3snipe/artifacts/bin/win-x86.zip)
-
 
 [Windows ARM](https://ci.appveyor.com/api/projects/tygamer1to7/3snipe/artifacts/bin/win-arm.zip) 
 
