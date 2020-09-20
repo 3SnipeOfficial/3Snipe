@@ -1,0 +1,15 @@
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe.deps.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe.runtimeconfig.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe.runtimeconfig.dev.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\3Snipe.pdb
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Release\net5.0\osx-x64\Newtonsoft.Json.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.csprojAssemblyReference.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.AssemblyInfoInputs.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.AssemblyInfo.cs
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.csproj.CoreCompileInputs.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.csproj.CopyComplete
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.pdb
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Release\net5.0\osx-x64\3Snipe.genruntimeconfig.cache
