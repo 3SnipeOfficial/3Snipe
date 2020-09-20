@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3Snipe-NETcore", "3Snipe-NETcore\3Snipe-NETcore.csproj", "{6A9E5984-A6FF-4631-8158-7E5FC3D2B3CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "3Snipe", "3Snipe\3Snipe.csproj", "{6A9E5984-A6FF-4631-8158-7E5FC3D2B3CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
