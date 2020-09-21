@@ -1,0 +1,14 @@
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.exe
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.deps.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.runtimeconfig.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.runtimeconfig.dev.json
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\3Snipe.pdb
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.AssemblyInfoInputs.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.AssemblyInfo.cs
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.csproj.CoreCompileInputs.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.csproj.CopyComplete
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.dll
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.pdb
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.genruntimeconfig.cache
