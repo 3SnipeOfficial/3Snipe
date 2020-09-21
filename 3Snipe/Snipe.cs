@@ -31,8 +31,8 @@ namespace _3Snipe
 				{
 					account = "";
 					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename and press enter: ");
-					key = Console.ReadKey();
+					Console.WriteLine("Enter your account in the format of 'email:password' (max 3) or leave blank or type in the filename and press enter: ");
+					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
 
@@ -63,7 +63,7 @@ namespace _3Snipe
 							password += ":";
 					}
 					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 30)
+					if (accounts.Count == 3)
 						break;
 				}
 				catch
@@ -73,7 +73,7 @@ namespace _3Snipe
 						try
 						{
 							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 30)
+							if (accounts2.Count < 3)
 							{
 								foreach (var acc in accounts2)
 								{
@@ -92,7 +92,7 @@ namespace _3Snipe
 							}
 							else
 							{
-								for (int h = 0; h < 30; h++)
+								for (int h = 0; h < 3; h++)
 								{
 									string acc = accounts2[h];
 									List<string> splits = acc.Split(':').ToList();
@@ -125,8 +125,8 @@ namespace _3Snipe
 			} while (account != "");
 			int k = 0;
 			int n = accounts.Count;
-			if (accounts.Count != 30)
-				while (accounts.Count != 30)
+			if (accounts.Count != 3)
+				while (accounts.Count != 3)
 				{
 					accounts.Add(new UserInfo(accounts[k].Email, accounts[k].Password));
 					k++;
@@ -165,6 +165,28 @@ namespace _3Snipe
 			int completeThreads = 0;
 			ProcessThreadCollection currentThreads = Process.GetCurrentProcess().Threads;
 			int defaultThreadCount = currentThreads.Count;
+			void acctPreCheck(object user2)
+			{
+				UserInfo user = (UserInfo)user2;
+				HttpClient authClient = new HttpClient();
+				try
+				{
+					var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}", Encoding.UTF8, "application/json");
+					string tokenResponse = "";
+					tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
+				}
+				catch
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid.");
+					Console.ResetColor();
+					return;
+				}
+			}
+			foreach (var acct in accounts)
+			{
+				acctPreCheck(acct);
+			}
 			void acctThread(object user2)
 			{
 				WebProxy proxy = null;
@@ -202,7 +224,7 @@ namespace _3Snipe
 						completeThreads++;
 					}
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("[Error] An account provided is invalid. Continuing execution without account.");
+					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid.");
 					Console.ResetColor();
 					return;
 				}
@@ -362,7 +384,7 @@ namespace _3Snipe
 					account = "";
 					ConsoleKeyInfo key;
 					Console.WriteLine("Enter your account in the format of 'email:password' (max 3) or leave blank or type in the filename and press enter: ");
-					key = Console.ReadKey();
+					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
 
@@ -481,6 +503,28 @@ namespace _3Snipe
 				Console.ReadKey();
 				return;
 			}
+			void acctPreCheck(object user2)
+			{
+				UserInfo user = (UserInfo)user2;
+				HttpClient authClient = new HttpClient();
+				try
+				{
+					var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}", Encoding.UTF8, "application/json");
+					string tokenResponse = "";
+					tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
+				}
+				catch
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid.");
+					Console.ResetColor();
+					return;
+				}
+			}
+			foreach (var acct in accounts)
+			{
+				acctPreCheck(acct);
+			}
 			try
 			{
 				Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(30000));
@@ -507,7 +551,7 @@ namespace _3Snipe
 				catch
 				{
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("[Error] An account provided is invalid. Continuing execution without account.");
+					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid.");
 					Console.ResetColor();
 					return;
 				}
@@ -617,7 +661,7 @@ namespace _3Snipe
 			for (int i = 0; i < threads2.Count; i++)
 			{
 				threads2[i].Start(accounts[i]);
-				Thread.Sleep(1);
+				Thread.Sleep(1000);
 			}
 			var completedNeeded = accounts.Count;
 			try
