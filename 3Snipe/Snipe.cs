@@ -281,7 +281,7 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 200));
+						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 120));
 					}
 					catch { }
 					for (int i = 0; i < 20; i++)
@@ -299,7 +299,6 @@ namespace _3Snipe
 							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
 						else
 							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
-						Thread.Sleep(75);
 					}
 					lock (lockObj)
 					{
@@ -312,7 +311,7 @@ namespace _3Snipe
 				}
 				for (int i = 0; i < 5; i++)
 				{
-					threads[i].Start(new ThreadInfo(i));
+					threads[i].Start(new ThreadInfo(i * accounts.IndexOf(user)));
 				}
 				while (innerThreadsComplete != 5)
 				{ }
@@ -415,7 +414,7 @@ namespace _3Snipe
 							password += ":";
 					}
 					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 1000)
+					if (accounts.Count == 3)
 						break;
 				}
 				catch
@@ -425,7 +424,7 @@ namespace _3Snipe
 						try
 						{
 							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 1000)
+							if (accounts2.Count < 3)
 							{
 								foreach (var acc in accounts2)
 								{
@@ -444,7 +443,7 @@ namespace _3Snipe
 							}
 							else
 							{
-								for (int h = 0; h < 1000; h++)
+								for (int h = 0; h < 3; h++)
 								{
 									string acc = accounts2[h];
 									List<string> splits = acc.Split(':').ToList();
@@ -603,7 +602,7 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 200));
+						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 120));
 					}
 					catch { }
 					for (int i = 0; i < 20; i++)
@@ -636,7 +635,6 @@ namespace _3Snipe
 							}
 							Console.WriteLine($"[Info] Got status code of {code} on a thread, request number {i}.");
 						}
-						Thread.Sleep(75);
 					}
 				}
 				for (int i = 0; i < 5; i++)
@@ -645,7 +643,7 @@ namespace _3Snipe
 				}
 				for (int i = 0; i < 5; i++)
 				{
-					threads[i].Start(new ThreadInfo(i));
+					threads[i].Start(new ThreadInfo(i * accounts.IndexOf(user)));
 				}
 				while (innerThreadsComplete != 5)
 				{ }

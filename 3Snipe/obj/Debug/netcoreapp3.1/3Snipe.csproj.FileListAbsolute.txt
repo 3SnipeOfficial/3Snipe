@@ -12,3 +12,4 @@ C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe
 C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.dll
 C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.pdb
 C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.genruntimeconfig.cache
+C:\Users\Tyler\Desktop\Files\3Snipe\3Snipe\3Snipe\obj\Debug\netcoreapp3.1\3Snipe.csprojAssemblyReference.cache
