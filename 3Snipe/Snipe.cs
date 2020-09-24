@@ -31,7 +31,7 @@ namespace _3Snipe
 				{
 					account = "";
 					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 3) or leave blank or type in the filename and press enter: ");
+					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename and press enter: ");
 					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
@@ -63,7 +63,7 @@ namespace _3Snipe
 							password += ":";
 					}
 					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 3)
+					if (accounts.Count == 30)
 						break;
 				}
 				catch
@@ -73,7 +73,7 @@ namespace _3Snipe
 						try
 						{
 							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 3)
+							if (accounts2.Count < 30)
 							{
 								foreach (var acc in accounts2)
 								{
@@ -92,7 +92,7 @@ namespace _3Snipe
 							}
 							else
 							{
-								for (int h = 0; h < 3; h++)
+								for (int h = 0; h < 30; h++)
 								{
 									string acc = accounts2[h];
 									List<string> splits = acc.Split(':').ToList();
@@ -125,13 +125,19 @@ namespace _3Snipe
 			} while (account != "");
 			int k = 0;
 			int n = accounts.Count;
-			if (accounts.Count != 3)
-				while (accounts.Count != 3)
+			int l = 0;
+			if (accounts.Count != 30)
+				while (accounts.Count != 30)
 				{
 					accounts.Add(new UserInfo(accounts[k].Email, accounts[k].Password));
 					k++;
 					if (k == n)
+					{
 						k = 0;
+						l++;
+					}
+					if (l > 2)
+						break;
 				}
 			Console.Clear();
 			Console.WriteLine("Enter name to snipe (leave blank to return to menu) and press enter: ");
@@ -382,7 +388,7 @@ namespace _3Snipe
 				{
 					account = "";
 					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 3) or leave blank or type in the filename and press enter: ");
+					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename and press enter: ");
 					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
@@ -414,7 +420,7 @@ namespace _3Snipe
 							password += ":";
 					}
 					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 3)
+					if (accounts.Count == 30)
 						break;
 				}
 				catch
@@ -424,7 +430,7 @@ namespace _3Snipe
 						try
 						{
 							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 3)
+							if (accounts2.Count < 30)
 							{
 								foreach (var acc in accounts2)
 								{
@@ -443,7 +449,7 @@ namespace _3Snipe
 							}
 							else
 							{
-								for (int h = 0; h < 3; h++)
+								for (int h = 0; h < 30; h++)
 								{
 									string acc = accounts2[h];
 									List<string> splits = acc.Split(':').ToList();
@@ -474,6 +480,22 @@ namespace _3Snipe
 				}
 				Console.Clear();
 			} while (account != "");
+			int k = 0;
+			int n = accounts.Count;
+			int l = 0;
+			if (accounts.Count != 30)
+				while (accounts.Count != 30)
+				{
+					accounts.Add(new UserInfo(accounts[k].Email, accounts[k].Password));
+					k++;
+					if (k == n)
+					{
+						k = 0;
+						l++;
+					}
+					if (l > 2)
+						break;
+				}
 			Console.Clear();
 			Console.WriteLine("Enter name to block (leave blank to return to menu) and press enter: ");
 			string name = Console.ReadLine();
