@@ -45,6 +45,7 @@ namespace _3Snipe
 		}
 		private static void Snipe()
 		{
+			Console.Write("\r \r");
 			for (; ; )
 			{
 				
@@ -81,7 +82,7 @@ namespace _3Snipe
 		}
 		private static void tools()
 		{
-
+			Console.Write("\r \r");
 			for (; ; )
 			{
 				

@@ -52,6 +52,7 @@ namespace _3Snipe
 						}
 						key = Console.ReadKey(true);
 					}
+					Console.WriteLine();
 					List<string> splits = account.Split(':').ToList();
 					string email = account.Split(':')[0];
 					splits.RemoveAt(0);
