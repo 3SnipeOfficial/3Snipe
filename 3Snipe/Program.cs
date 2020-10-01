@@ -48,7 +48,6 @@ namespace _3Snipe
 			for (; ; )
 			{
 				
-				branding();
 				Console.WriteLine(@"Sniping Menu:
 1) Snipe (multi-account or single)
 2) Block (multi-account or single) (Disabled)
@@ -86,7 +85,6 @@ namespace _3Snipe
 			for (; ; )
 			{
 				
-				branding();
 				Console.WriteLine(@"Tools:
 1) Do Security Questions
 2) Load proxies
