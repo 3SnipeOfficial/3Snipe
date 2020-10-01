@@ -23,7 +23,7 @@ namespace _3Snipe
 			DateTime dropTime;
 			List<UserInfo> accounts = new List<UserInfo>();
 			int defaultThreadsCount = Process.GetCurrentProcess().Threads.Count;
-			Console.Clear();
+			
 			string account = "";
 			do
 			{
@@ -31,7 +31,7 @@ namespace _3Snipe
 				{
 					account = "";
 					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename and press enter: ");
+					Console.WriteLine("Enter your account in the format of 'email:password' or leave blank or type in the filename and press enter: ");
 					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
@@ -63,83 +63,16 @@ namespace _3Snipe
 							password += ":";
 					}
 					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 30)
-						break;
 				}
 				catch
 				{
-					if (File.Exists(account))
-					{
-						try
-						{
-							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 30)
-							{
-								foreach (var acc in accounts2)
-								{
-									List<string> splits = acc.Split(':').ToList();
-									string email = acc.Split(':')[0];
-									splits.RemoveAt(0);
-									string password = "";
-									for (int i = 0; i < splits.Count; i++)
-									{
-										password += splits[i];
-										if (i != splits.Count - 1)
-											password += ":";
-									}
-									accounts.Add(new UserInfo(email, password));
-								}
-							}
-							else
-							{
-								for (int h = 0; h < 30; h++)
-								{
-									string acc = accounts2[h];
-									List<string> splits = acc.Split(':').ToList();
-									string email = acc.Split(':')[0];
-									splits.RemoveAt(0);
-									string password = "";
-									for (int i = 0; i < splits.Count; i++)
-									{
-										password += splits[i];
-										if (i != splits.Count - 1)
-											password += ":";
-									}
-									accounts.Add(new UserInfo(email, password));
-								}
-							}
-						}
-						catch
-						{
-							Console.ForegroundColor = ConsoleColor.Red;
-							Console.WriteLine("[Error] An error occured reading your accounts file. Make sure it is formatted properly. The proper format is email:password.");
-							Console.ResetColor();
-							Console.ReadKey();
-							return;
-						}
-					}
-					else
-						break;
+					break;
 				}
-				Console.Clear();
 			} while (account != "");
-			int k = 0;
-			int n = accounts.Count;
-			int l = 0;
-			if (accounts.Count != 30)
-				while (accounts.Count != 30)
-				{
-					accounts.Add(new UserInfo(accounts[k].Email, accounts[k].Password));
-					k++;
-					if (k == n)
-					{
-						k = 0;
-						l++;
-					}
-					if (l > 2)
-						break;
-				}
-			Console.Clear();
+			var oldAccts = accounts;
+			accounts.AddRange(accounts);
+			accounts.AddRange(oldAccts);
+			
 			Console.WriteLine("Enter name to snipe (leave blank to return to menu) and press enter: ");
 			string name = Console.ReadLine();
 			HttpClient sniperClient = new HttpClient();
@@ -167,6 +100,13 @@ namespace _3Snipe
 				Console.ReadKey();
 				return;
 			}
+			double customDelay = 0;
+			Console.WriteLine("Enter an offset for timing (defaults to 0 if blank/invalid): ");
+			try
+			{
+				customDelay = Double.Parse(Console.ReadLine());
+			}
+			catch { }
 			string emailSniped = "";
 			int completeThreads = 0;
 			ProcessThreadCollection currentThreads = Process.GetCurrentProcess().Threads;
@@ -180,6 +120,7 @@ namespace _3Snipe
 					var content = new StringContent($"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{user.Email}\", \"password\": \"{user.Password}\"}}", Encoding.UTF8, "application/json");
 					string tokenResponse = "";
 					tokenResponse = authClient.PostAsync("https://authserver.mojang.com/authenticate", content).Result.Content.ReadAsStringAsync().Result;
+					string token = (string)JObject.Parse(tokenResponse)["accessToken"];
 				}
 				catch
 				{
@@ -287,10 +228,10 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 120));
+						Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * 120));
 					}
 					catch { }
-					for (int i = 0; i < 20; i++)
+					for (int i = 0; i < 5; i++)
 					{
 						if (snipedAlready)
 							return;
@@ -338,7 +279,6 @@ namespace _3Snipe
 			for (int i = 0; i < threads2.Count; i++)
 			{
 				threads2[i].Start(accounts[i]);
-				Thread.Sleep(1000);
 			}
 			try
 			{
@@ -362,7 +302,7 @@ namespace _3Snipe
 				Console.WriteLine("Press any key to return to the menu.");
 				snipedAlready = false;
 				Console.ReadKey();
-				Console.Clear();
+				
 				return;
 			}
 			else
@@ -372,7 +312,7 @@ namespace _3Snipe
 				snipedAlready = false;
 				Console.ResetColor();
 				Console.ReadKey();
-				Console.Clear();
+				
 				return;
 			}
 		}
@@ -380,7 +320,7 @@ namespace _3Snipe
 		{
 			DateTime dropTime;
 			List<UserInfo> accounts = new List<UserInfo>();
-			Console.Clear();
+			
 			string account = "";
 			do
 			{
@@ -478,7 +418,7 @@ namespace _3Snipe
 					else
 						break;
 				}
-				Console.Clear();
+				
 			} while (account != "");
 			int k = 0;
 			int n = accounts.Count;
@@ -496,7 +436,7 @@ namespace _3Snipe
 					if (l > 2)
 						break;
 				}
-			Console.Clear();
+			
 			Console.WriteLine("Enter name to block (leave blank to return to menu) and press enter: ");
 			string name = Console.ReadLine();
 			HttpClient sniperClient = new HttpClient();
@@ -624,10 +564,10 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(2000) + TimeSpan.FromMilliseconds(delay * 120));
+						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(1200) + TimeSpan.FromMilliseconds(delay * 120));
 					}
 					catch { }
-					for (int i = 0; i < 20; i++)
+					for (int i = 0; i < 5; i++)
 					{
 						if (snipedAlready)
 							return;
@@ -681,7 +621,6 @@ namespace _3Snipe
 			for (int i = 0; i < threads2.Count; i++)
 			{
 				threads2[i].Start(accounts[i]);
-				Thread.Sleep(1000);
 			}
 			var completedNeeded = accounts.Count;
 			try
@@ -706,7 +645,7 @@ namespace _3Snipe
 				Console.WriteLine("Press any key to return to the menu.");
 				snipedAlready = false;
 				Console.ReadKey();
-				Console.Clear();
+				
 				return;
 			}
 			else
@@ -716,7 +655,7 @@ namespace _3Snipe
 				snipedAlready = false;
 				Console.ResetColor();
 				Console.ReadKey();
-				Console.Clear();
+				
 				return;
 			}
 		}
@@ -726,7 +665,7 @@ namespace _3Snipe
 
 			ProcessThreadCollection currentThreads = Process.GetCurrentProcess().Threads;
 			int defaultThreadCount = currentThreads.Count;
-			Console.Clear();
+			
 			List<string> working = new List<string>();
 			proxies = new List<string>();
 			string proxy = " ";
@@ -735,7 +674,7 @@ namespace _3Snipe
 				Console.WriteLine("Enter HTTP proxy or leave blank and press enter: ");
 				proxy = Console.ReadLine();
 				if (proxy != "") { proxies.Add(proxy); }
-				Console.Clear();
+				
 			}
 			Console.WriteLine("Proxy check running.");
 			int running = defaultThreadCount;
@@ -791,7 +730,7 @@ namespace _3Snipe
 			proxies = working;
 			Console.WriteLine("Proxy check complete. Press any key to return to menu.");
 			Console.ReadKey();
-			Console.Clear();
+			
 		}
 	}
 }

@@ -19,10 +19,11 @@ namespace _3Snipe
 {
 	class Program
 	{
-		static readonly string vCode = "v2.0.0-beta.4";
+		static readonly string vCode = "v2.0.0-beta.5";
 		
 		static void Main(string[] args)
 		{
+			branding();
 			menu();
 		}
 		static void branding()
@@ -46,11 +47,11 @@ namespace _3Snipe
 		{
 			for (; ; )
 			{
-				Console.Clear();
+				
 				branding();
 				Console.WriteLine(@"Sniping Menu:
 1) Snipe (multi-account or single)
-2) Block (multi-account or single)
+2) Block (multi-account or single) (Disabled)
 3) Back
 ");
 				char option = Console.ReadKey().KeyChar;
@@ -63,8 +64,8 @@ namespace _3Snipe
 				switch (option)
 				{
 					case '1': SniperClass.mutliAcctSnipe(); break;
-					case '2': SniperClass.mutliAcctBlock(); break;
-					case '3': Console.Clear(); return;
+					case '2': break;
+					case '3': return;
 					default: break;
 				}
 			}
@@ -73,10 +74,10 @@ namespace _3Snipe
 		
 		private static void configure()
 		{
-			Console.Clear();
+			
 			Console.WriteLine("Under construction. Press a key to go back.");
 			Console.ReadKey();
-			Console.Clear();
+			
 			return;
 		}
 		private static void tools()
@@ -84,7 +85,7 @@ namespace _3Snipe
 
 			for (; ; )
 			{
-				Console.Clear();
+				
 				branding();
 				Console.WriteLine(@"Tools:
 1) Do Security Questions
@@ -102,7 +103,7 @@ namespace _3Snipe
 				{
 					case '1': doQuestions(); break;
 					case '2': SniperClass.doProxies(); break;
-					case '3': Console.Clear(); return;
+					case '3':  return;
 					default: break;
 				}
 			}
@@ -119,7 +120,7 @@ namespace _3Snipe
              * POST https://api.mojang.com/user/security/location
              */
 
-			Console.Clear();
+			
 
 			WebClient sniperClient = new WebClient();
 			string email = "";
@@ -170,7 +171,7 @@ namespace _3Snipe
 				Console.ReadKey();
 				return;
 			}
-			Console.Clear();
+			
 			string f16 = accessToken.Substring(0, 16);
 			Console.WriteLine($"[Info] Got token. First 16 characters are {f16}");
 			sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
@@ -246,12 +247,10 @@ namespace _3Snipe
 		{
 			for (; ; )
 			{
-				Console.Clear();
-				branding();
 				Console.WriteLine(@"
 Menu:
 1) Snipe name
-2) Settings
+2) Settings (Disabled)
 3) Tools
 4) Exit
 ");
@@ -265,16 +264,16 @@ Menu:
 				switch (option)
 				{
 					case '1': Snipe(); break;
-					case '2': configure(); break;
+					case '2': break;
 					case '3': tools(); break;
-					case '4': Console.Clear(); System.Environment.Exit(0); break;
+					case '4':  System.Environment.Exit(0); break;
 					default: break;
 				}
 			}
 		}
 		public static void verify(string name)
 		{
-			Console.Clear();
+			
 			Console.WriteLine("Do you wish to show this snipe in Discord?");
 			if (Console.Read() == 'y' || Console.Read() == 'Y')
 			{
@@ -286,7 +285,7 @@ Menu:
 				Thread.Sleep(90000);
 				Console.WriteLine("90 seconds done. If verified successfully you will see your snipe.");
 			}
-			Console.Clear();
+			
 		}
 	}
 }
