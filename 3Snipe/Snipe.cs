@@ -70,10 +70,6 @@ namespace _3Snipe
 					break;
 				}
 			} while (account != "");
-			var oldAccts = accounts;
-			accounts.AddRange(accounts);
-			accounts.AddRange(oldAccts);
-			
 			Console.WriteLine("Enter name to snipe (leave blank to return to menu) and press enter: ");
 			string name = Console.ReadLine();
 			HttpClient sniperClient = new HttpClient();
