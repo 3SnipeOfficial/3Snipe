@@ -108,6 +108,13 @@ namespace _3Snipe
 				customDelay = Double.Parse(Console.ReadLine());
 			}
 			catch { }
+			double customInbetween = 120;
+			Console.WriteLine("Enter an offset for timing (defaults to 0 if blank/invalid): ");
+			try
+			{
+				customInbetween = Double.Parse(Console.ReadLine());
+			}
+			catch { }
 			string emailSniped = "";
 			int completeThreads = 0;
 			ProcessThreadCollection currentThreads = Process.GetCurrentProcess().Threads;
@@ -229,7 +236,7 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * 120));
+						Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * customInbetween));
 					}
 					catch { }
 					for (int i = 0; i < 5; i++)
