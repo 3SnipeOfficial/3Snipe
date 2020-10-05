@@ -23,54 +23,85 @@ namespace _3Snipe
 			DateTime dropTime;
 			List<UserInfo> accounts = new List<UserInfo>();
 			int defaultThreadsCount = Process.GetCurrentProcess().Threads.Count;
-			
-			string account = "";
-			do
+			if (!File.Exists("./accounts.txt"))
 			{
-				try
+				string account = "";
+				do
 				{
-					account = "";
-					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' or leave blank or type in the filename and press enter: ");
-					key = Console.ReadKey(true);
-					while (key.Key != ConsoleKey.Enter)
+					try
 					{
-
-						if (key.Key != ConsoleKey.Backspace)
-						{
-							account += key.KeyChar;
-							Console.Write("*");
-						}
-						else
-						{
-							Console.Write("\b \b");
-							try
-							{
-								account = account.Substring(0, account.Length - 1);
-							}
-							catch { }
-						}
+						account = "";
+						ConsoleKeyInfo key;
+						Console.WriteLine("Enter your account in the format of 'email:password' or leave blank to stop: ");
 						key = Console.ReadKey(true);
+						while (key.Key != ConsoleKey.Enter)
+						{
+
+							if (key.Key != ConsoleKey.Backspace)
+							{
+								account += key.KeyChar;
+								Console.Write("*");
+							}
+							else
+							{
+								Console.Write("\b \b");
+								try
+								{
+									account = account.Substring(0, account.Length - 1);
+								}
+								catch { }
+							}
+							key = Console.ReadKey(true);
+						}
+						Console.WriteLine();
+						List<string> splits = account.Split(':').ToList();
+						string email = account.Split(':')[0];
+						splits.RemoveAt(0);
+						string password = "";
+						for (int i = 0; i < splits.Count; i++)
+						{
+							password += splits[i];
+							if (i != splits.Count - 1)
+								password += ":";
+						}
+						accounts.Add(new UserInfo(email, password));
 					}
-					Console.WriteLine();
-					List<string> splits = account.Split(':').ToList();
-					string email = account.Split(':')[0];
-					splits.RemoveAt(0);
-					string password = "";
-					for (int i = 0; i < splits.Count; i++)
+					catch
 					{
-						password += splits[i];
-						if (i != splits.Count - 1)
-							password += ":";
+						break;
 					}
-					accounts.Add(new UserInfo(email, password));
-				}
-				catch
+				} while (account != "");
+			}
+			else {
+				try {
+					StreamReader accountReader = new StreamReader("./accounts.txt");
+					string account;
+					while ((account = accountReader.ReadLine()) != null)
+					{
+						try
+						{
+							List<string> splits = account.Split(':').ToList();
+							string email = account.Split(':')[0];
+							splits.RemoveAt(0);
+							string password = "";
+							for (int i = 0; i < splits.Count; i++)
+							{
+								password += splits[i];
+								if (i != splits.Count - 1)
+									password += ":";
+							}
+							accounts.Add(new UserInfo(email, password));
+						}
+						catch { }
+					}
+					accountReader.Close();
+				} catch
 				{
-					break;
+					Console.WriteLine("Failed to open accounts.txt even though it exists.");
+					return;
 				}
-			} while (account != "");
-			Console.WriteLine("Enter name to snipe (leave blank to return to menu) and press enter: ");
+			}
+			Console.WriteLine("Enter name to snipe (leave blank to return to menu): ");
 			string name = Console.ReadLine();
 			HttpClient sniperClient = new HttpClient();
 			Console.WriteLine();
@@ -343,7 +374,7 @@ namespace _3Snipe
 				{
 					account = "";
 					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename and press enter: ");
+					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename: ");
 					key = Console.ReadKey(true);
 					while (key.Key != ConsoleKey.Enter)
 					{
@@ -452,7 +483,7 @@ namespace _3Snipe
 						break;
 				}
 			
-			Console.WriteLine("Enter name to block (leave blank to return to menu) and press enter: ");
+			Console.WriteLine("Enter name to block (leave blank to return to menu): ");
 			string name = Console.ReadLine();
 			HttpClient sniperClient = new HttpClient();
 			Console.WriteLine();
@@ -686,7 +717,7 @@ namespace _3Snipe
 			string proxy = " ";
 			while (proxy != "")
 			{
-				Console.WriteLine("Enter HTTP proxy or leave blank and press enter: ");
+				Console.WriteLine("Enter HTTP proxy or leave blank: ");
 				proxy = Console.ReadLine();
 				if (proxy != "") { proxies.Add(proxy); }
 				

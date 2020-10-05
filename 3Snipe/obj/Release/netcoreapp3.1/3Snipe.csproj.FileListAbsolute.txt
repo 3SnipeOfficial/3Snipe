@@ -1,0 +1,15 @@
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.exe
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.deps.json
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.runtimeconfig.json
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.runtimeconfig.dev.json
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.dll
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\3Snipe.pdb
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\bin\Release\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.csprojAssemblyReference.cache
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.AssemblyInfoInputs.cache
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.AssemblyInfo.cs
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.csproj.CoreCompileInputs.cache
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.csproj.CopyComplete
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.dll
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.pdb
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.genruntimeconfig.cache
