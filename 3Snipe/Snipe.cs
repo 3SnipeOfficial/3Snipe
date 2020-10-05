@@ -20,6 +20,7 @@ namespace _3Snipe
 		private static List<string> proxies = new List<string>();
 		public static void mutliAcctSnipe()
 		{
+			Console.WriteLine("\r \r");
 			DateTime dropTime;
 			List<UserInfo> accounts = new List<UserInfo>();
 			int defaultThreadsCount = Process.GetCurrentProcess().Threads.Count;
@@ -170,7 +171,8 @@ namespace _3Snipe
 				catch
 				{
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid.");
+					accounts.RemoveAt(accounts.IndexOf(user));
+					Console.WriteLine($"[Error] The account provided with email {user.Email} is invalid. Removed from account list (not the file, just program.)");
 					Console.ResetColor();
 					return;
 				}
@@ -338,7 +340,7 @@ namespace _3Snipe
 				running = Process.GetCurrentProcess().Threads.Count;
 			}
 			TimeSpan timeTaken = DateTime.Now - start;
-			Console.WriteLine($"Requests done, all requests sent in {timeTaken}.");
+			Console.WriteLine($"Requests done, all requests sent in {timeTaken}. RPS = {(accounts.Count * 3) / timeTaken.TotalSeconds}");
 			if (snipedAlready)
 			{
 				Console.ForegroundColor = ConsoleColor.Green;

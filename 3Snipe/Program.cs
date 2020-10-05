@@ -19,7 +19,7 @@ namespace _3Snipe
 {
 	class Program
 	{
-		static readonly string vCode = "v2.0.0-beta.6";
+		static readonly string vCode = "v2.0.0-beta.7";
 		
 		static void Main(string[] args)
 		{
@@ -88,7 +88,7 @@ namespace _3Snipe
 				
 				Console.WriteLine(@"Tools:
 1) Do Security Questions
-2) Load proxies
+2) Load proxies (Disabled)
 3) Back
 ");
 				char option = Console.ReadKey().KeyChar;
@@ -101,8 +101,8 @@ namespace _3Snipe
 				switch (option)
 				{
 					case '1': doQuestions(); break;
-					case '2': SniperClass.doProxies(); break;
-					case '3':  return;
+					case '2': break;
+					case '3': return;
 					default: break;
 				}
 			}
