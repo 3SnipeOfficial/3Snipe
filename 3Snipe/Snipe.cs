@@ -109,10 +109,20 @@ namespace _3Snipe
 			}
 			catch { }
 			double customInbetween = 120;
-			Console.WriteLine("Enter an offset for timing (defaults to 0 if blank/invalid): ");
+			Console.WriteLine("Enter an offset for timing between accounts (defaults to 120 if blank/invalid): ");
 			try
 			{
 				customInbetween = Double.Parse(Console.ReadLine());
+			}
+			catch { }
+			double customInbetweenAccountCount = 1;
+			Console.WriteLine("Enter the number of accounts for each timing (defaults to 1 if blank/invalid): ");
+			try
+			{
+				customInbetweenAccountCount = Double.Parse(Console.ReadLine());
+				if (customInbetweenAccountCount < 1) {
+					customInbetweenAccountCount = 1;
+				}
 			}
 			catch { }
 			string emailSniped = "";
@@ -211,6 +221,7 @@ namespace _3Snipe
 				void sniperthread(object info)
 				{
 					int delay = ((ThreadInfo)info).ThreadID;
+					delay = (int)(delay/customInbetweenAccountCount);
 					HttpClient sniperClient2 = new HttpClient(new HttpClientHandler()
 					{
 						Proxy = proxy
