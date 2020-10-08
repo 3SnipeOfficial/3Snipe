@@ -279,7 +279,7 @@ namespace _3Snipe
 						Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * customInbetween));
 					}
 					catch { }
-					for (int i = 0; i < 5; i++)
+					for (int i = 0; i < 3; i++)
 					{
 						if (snipedAlready)
 							return;
@@ -300,15 +300,9 @@ namespace _3Snipe
 						innerThreadsComplete++;
 					}
 				}
-				for (int i = 0; i < 5; i++)
-				{
-					threads.Add(new Thread(new ParameterizedThreadStart(sniperthread)));
-				}
-				for (int i = 0; i < 5; i++)
-				{
-					threads[i].Start(new ThreadInfo(i * accounts.IndexOf(user)));
-				}
-				while (innerThreadsComplete != 5)
+				var thread = new Thread(new ParameterizedThreadStart(sniperthread));
+				thread.Start();
+				while (innerThreadsComplete != 1)
 				{ }
 				accessToken = "Disposed.";
 				user.Password = "Disposed.";
