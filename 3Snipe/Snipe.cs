@@ -301,7 +301,7 @@ namespace _3Snipe
 					}
 				}
 				var thread = new Thread(new ParameterizedThreadStart(sniperthread));
-				thread.Start();
+				thread.Start(new ThreadInfo(accounts.IndexOf(user)));
 				while (innerThreadsComplete != 1)
 				{ }
 				accessToken = "Disposed.";
