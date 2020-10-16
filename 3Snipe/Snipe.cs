@@ -293,20 +293,16 @@ namespace _3Snipe
 						else if (response.IsSuccessStatusCode)
 							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
 						else
-							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
+							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}. Time = {DateTime.Now.ToShortTimeString()}");
 					}
-					lock (lockObj)
-					{
-						innerThreadsComplete++;
-					}
+					accessToken = "Disposed.";
+					user.Password = "Disposed.";
+					payload = null;
 				}
 				var thread = new Thread(new ParameterizedThreadStart(sniperthread));
 				thread.Start(new ThreadInfo(accounts.IndexOf(user)));
-				while (innerThreadsComplete != 1)
+				while (payload != null)
 				{ }
-				accessToken = "Disposed.";
-				user.Password = "Disposed.";
-				payload = null;
 			}
 			var threads2 = new List<Thread>();
 			foreach (var account2 in accounts)

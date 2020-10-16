@@ -19,7 +19,7 @@ namespace _3Snipe
 {
 	class Program
 	{
-		static readonly string vCode = "v2.0.0-beta.7 hotfix 2";
+		static readonly string vCode = "v2.0.0-beta.8";
 		
 		static void Main(string[] args)
 		{
