@@ -81,6 +81,12 @@ namespace _3Snipe
 					{
 						try
 						{
+							string[] questions = null;
+							try
+							{
+								questions = account.Split("    ")[1].Split(':');
+							}
+							catch { }
 							List<string> splits = account.Split(':').ToList();
 							string email = account.Split(':')[0];
 							splits.RemoveAt(0);
@@ -91,7 +97,7 @@ namespace _3Snipe
 								if (i != splits.Count - 1)
 									password += ":";
 							}
-							accounts.Add(new UserInfo(email, password));
+							accounts.Add((questions == null) ? new UserInfo(email, password) : new UserInfo(email, password, questions));
 						}
 						catch { }
 					}
@@ -227,8 +233,14 @@ namespace _3Snipe
 				try
 				{
 					authClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-					string tempStr = authClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result;
-
+					HttpResponseMessage tempStr = authClient.GetAsync("https://api.mojang.com/user/security/location").Result;
+					if (tempStr.StatusCode != HttpStatusCode.NoContent)
+					{
+						JArray questionRes = JArray.Parse(authClient.GetStringAsync("https://api.mojang.com/user/security/challenges").Result);
+						string req = $"[{{\"id\": \"{(string)questionRes[0]["answer"]["id"]}\", \"answer\": \"{user.SecurityInfo[0]}\"}}, {{\"id\": \"{(string)questionRes[1]["answer"]["id"]}\", \"answer\": \"{user.SecurityInfo[1]}\"}}, {{\"id\": \"{(string)questionRes[2]["answer"]["id"]}\", \"answer\": \"{user.SecurityInfo[2]}\"}}]";
+						HttpResponseMessage res = authClient.PostAsync("https://api.mojang.com/user/security/location", new StringContent(req)).Result;
+						if (res.StatusCode != HttpStatusCode.NoContent) return;
+					}
 				}
 				catch
 				{
@@ -286,14 +298,14 @@ namespace _3Snipe
 						var response = sniperClient2.PostAsync("https://api.mojang.com/user/profile/" + userUUID + "/name", payload).Result;
 						if (response.StatusCode == HttpStatusCode.NoContent)
 						{
-							Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}.");
+							Console.WriteLine($"[Info] Got status code of 204 on a thread, request number {i}. Time = {DateTime.Now.ToLongTimeString()}");
 							snipedAlready = true;
 							emailSniped = user.Email;
 						}
 						else if (response.IsSuccessStatusCode)
-							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}.");
+							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}. Time = {DateTime.Now.ToLongTimeString()}");
 						else
-							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}. Time = {DateTime.Now.ToShortTimeString()}");
+							Console.WriteLine($"[Info] Got status code of {response.StatusCode} on a thread, request number {i}. Time = {DateTime.Now.ToLongTimeString()}");
 					}
 					accessToken = "Disposed.";
 					user.Password = "Disposed.";
@@ -358,106 +370,96 @@ namespace _3Snipe
 		{
 			DateTime dropTime;
 			List<UserInfo> accounts = new List<UserInfo>();
-			
-			string account = "";
-			do
-			{
-				try
-				{
-					account = "";
-					ConsoleKeyInfo key;
-					Console.WriteLine("Enter your account in the format of 'email:password' (max 30) or leave blank or type in the filename: ");
-					key = Console.ReadKey(true);
-					while (key.Key != ConsoleKey.Enter)
-					{
 
-						if (key.Key != ConsoleKey.Backspace)
-						{
-							account += key.KeyChar;
-							Console.Write("*");
-						}
-						else
-						{
-							Console.Write("\b \b");
-							try
-							{
-								account = account.Substring(0, account.Length - 1);
-							}
-							catch { }
-						}
-						key = Console.ReadKey(true);
-					}
-					List<string> splits = account.Split(':').ToList();
-					string email = account.Split(':')[0];
-					splits.RemoveAt(0);
-					string password = "";
-					for (int i = 0; i < splits.Count; i++)
-					{
-						password += splits[i];
-						if (i != splits.Count - 1)
-							password += ":";
-					}
-					accounts.Add(new UserInfo(email, password));
-					if (accounts.Count == 30)
-						break;
-				}
-				catch
+			Console.WriteLine("\r \r");
+			int defaultThreadsCount = Process.GetCurrentProcess().Threads.Count;
+			if (!File.Exists("./accounts.txt"))
+			{
+				string account = "";
+				do
 				{
-					if (File.Exists(account))
+					try
 					{
-						try
+						account = "";
+						ConsoleKeyInfo key;
+						Console.WriteLine("Enter your account in the format of 'email:password' or leave blank to stop: ");
+						key = Console.ReadKey(true);
+						while (key.Key != ConsoleKey.Enter)
 						{
-							List<string> accounts2 = File.ReadAllLines(account).ToList();
-							if (accounts2.Count < 30)
+
+							if (key.Key != ConsoleKey.Backspace)
 							{
-								foreach (var acc in accounts2)
-								{
-									List<string> splits = acc.Split(':').ToList();
-									string email = acc.Split(':')[0];
-									splits.RemoveAt(0);
-									string password = "";
-									for (int i = 0; i < splits.Count; i++)
-									{
-										password += splits[i];
-										if (i != splits.Count - 1)
-											password += ":";
-									}
-									accounts.Add(new UserInfo(email, password));
-								}
+								account += key.KeyChar;
+								Console.Write("*");
 							}
 							else
 							{
-								for (int h = 0; h < 30; h++)
+								Console.Write("\b \b");
+								try
 								{
-									string acc = accounts2[h];
-									List<string> splits = acc.Split(':').ToList();
-									string email = acc.Split(':')[0];
-									splits.RemoveAt(0);
-									string password = "";
-									for (int i = 0; i < splits.Count; i++)
-									{
-										password += splits[i];
-										if (i != splits.Count - 1)
-											password += ":";
-									}
-									accounts.Add(new UserInfo(email, password));
+									account = account.Substring(0, account.Length - 1);
 								}
+								catch { }
 							}
+							key = Console.ReadKey(true);
 						}
-						catch
+						Console.WriteLine();
+						List<string> splits = account.Split(':').ToList();
+						string email = account.Split(':')[0];
+						splits.RemoveAt(0);
+						string password = "";
+						for (int i = 0; i < splits.Count; i++)
 						{
-							Console.ForegroundColor = ConsoleColor.Red;
-							Console.WriteLine("[Error] An error occured reading your accounts file. Make sure it is formatted properly. The proper format is email:password.");
-							Console.ResetColor();
-							Console.ReadKey();
-							return;
+							password += splits[i];
+							if (i != splits.Count - 1)
+								password += ":";
 						}
+						accounts.Add(new UserInfo(email, password));
 					}
-					else
+					catch
+					{
 						break;
+					}
+				} while (account != "");
+			}
+			else
+			{
+				try
+				{
+					StreamReader accountReader = new StreamReader("./accounts.txt");
+					string account;
+					while ((account = accountReader.ReadLine()) != null)
+					{
+						try
+						{
+							string[] questions = null;
+							try
+							{
+								questions = account.Split("    ")[1].Split(';');
+							}
+							catch { }
+							List<string> splits = account.Split(':').ToList();
+							string email = account.Split(':')[0];
+							splits.RemoveAt(0);
+							string password = "";
+							for (int i = 0; i < splits.Count; i++)
+							{
+								password += splits[i];
+								if (i != splits.Count - 1)
+									password += ":";
+							}
+							accounts.Add((questions == null) ? new UserInfo(email, password) : new UserInfo(email, password, questions));
+						}
+						catch { }
+					}
+					accountReader.Close();
 				}
-				
-			} while (account != "");
+				catch
+				{
+					Console.WriteLine("Failed to open accounts.txt even though it exists.");
+					return;
+				}
+			}
 			int k = 0;
 			int n = accounts.Count;
 			int l = 0;
@@ -530,7 +532,6 @@ namespace _3Snipe
 			}
 			catch { }
 			string emailSniped = "";
-			int defaultThreadsCount = Process.GetCurrentProcess().Threads.Count;
 			void acctThread(object user2)
 			{
 				UserInfo user = (UserInfo)user2;

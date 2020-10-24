@@ -19,7 +19,7 @@ namespace _3Snipe
 {
 	class Program
 	{
-		static readonly string vCode = "v2.0.0-beta.8";
+		static readonly string vCode = "v2.0.0-beta.9";
 		
 		static void Main(string[] args)
 		{
@@ -110,137 +110,8 @@ namespace _3Snipe
 		
 		private static void doQuestions()
 		{
-			/*
-             * The flow of security questions is as follows:
-             * GET https://api.mojang.com/user/security/challenges
-             * ||
-             * ||
-             * \/
-             * POST https://api.mojang.com/user/security/location
-             */
-
-			
-
-			WebClient sniperClient = new WebClient();
-			string email = "";
-			string password = "";
-			try
-			{
-				string account = "";
-				ConsoleKeyInfo key;
-				Console.WriteLine("Enter your Minecraft account in the format of 'email:password' and press enter: ");
-				do
-				{
-					key = Console.ReadKey(true);
-					if (key.Key != ConsoleKey.Backspace)
-					{
-						account += key.KeyChar;
-						Console.Write("*");
-					}
-					else
-					{
-						Console.Write("\b \b");
-					}
-				}
-				while (key.Key != ConsoleKey.Enter);
-				account = account.Substring(0, account.Length - 1);
-
-				email = account.Split(':')[0];
-				password = account.Split(':')[1];
-			}
-			catch
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("[Error] Invalid input. Press any key to return to the menu.");
-				Console.ResetColor();
-				Console.ReadKey();
-				return;
-			}
-			string accessToken = "";
-			try
-			{
-				string tokenResponse = sniperClient.UploadString("https://authserver.mojang.com/authenticate", $"{{\"agent\": {{\"name\": \"Minecraft\", \"version\": 1}},\"username\": \"{email}\", \"password\": \"{password}\"}}");
-				accessToken = (string)JObject.Parse(tokenResponse)["accessToken"];
-			}
-			catch
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("[Error] The account provided is invalid. Press any key to return to the menu.");
-				Console.ResetColor();
-				Console.ReadKey();
-				return;
-			}
-			
-			string f16 = accessToken.Substring(0, 16);
-			Console.WriteLine($"[Info] Got token. First 16 characters are {f16}");
-			sniperClient.Headers.Add(HttpRequestHeader.Authorization, $"Bearer {accessToken}");
-			try
-			{
-				string tempqs = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
-				if (tempqs == "[]")
-				{
-					Console.WriteLine("[Info] Questions not needed. Press any key to return to the menu.");
-					Console.ReadKey();
-					return;
-				}
-			}
-			catch { }
-			Console.WriteLine("[Info] Getting questions now.");
-			List<string> questions = new List<string>();
-			List<int> ids = new List<int>();
-			try
-			{
-				string tempqs = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
-				JArray qarr = JArray.Parse(tempqs);
-				for (int i = 0; i < 3; i++)
-				{
-					questions.Add((string)qarr[i]["question"]["question"]);
-					ids.Add((int)qarr[i]["answer"]["id"]);
-				}
-			}
-			catch
-			{
-				try
-				{
-					string tempqs = sniperClient.DownloadString("https://api.mojang.com/user/security/challenges");
-					if (tempqs == "[]")
-					{
-						Console.WriteLine("[Info] Questions not needed. Press any key to return to the menu.");
-						Console.ReadKey();
-						return;
-					}
-					else { throw new Exception("Questions needed, but response invalid."); }
-				}
-				catch
-				{
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("[Error] Questions failed to fetch. Press any key to return to the menu.");
-					Console.ResetColor();
-					Console.ReadKey();
-					return;
-				}
-			}
-			Console.WriteLine("[Info] Questions starting. Respond with the EXACT answers.");
-			Console.WriteLine($"[Question] {questions[0]}");
-			string a1 = Console.ReadLine();
-			Console.WriteLine($"[Question] {questions[1]}");
-			string a2 = Console.ReadLine();
-			Console.WriteLine($"[Question] {questions[2]}");
-			string a3 = Console.ReadLine();
-			Console.WriteLine("[Info] Sending responses.");
-			try
-			{
-				sniperClient.UploadString("https://api.mojang.com/user/security/location", $"[{{\"id\": {ids[0]}, \"answer\": \"{a1}\"}}, {{\"id\": {ids[1]}, \"answer\": \"{a2}\"}}, {{\"id\": {ids[2]}, \"answer\": \"{a3}\"}}]");
-				Console.WriteLine("[Info] Questions answered successfully. Press any key to return to the menu.");
-				Console.ReadKey();
-			}
-			catch
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("[Error] At least one answer was wrong. Press any key to return to the menu.");
-				Console.ResetColor();
-				Console.ReadKey();
-			}
+			Console.WriteLine("This menu has been deprecated in favor of accounts.txt. If you need to authenticate with questions,\nuse accounts.txt or use minecraft.net");
+			return;
 		}
 		private static void menu()
 		{
