@@ -288,7 +288,7 @@ namespace _3Snipe
 					}
 					try
 					{
-						Thread.Sleep(dropTime - DateTime.Now + TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * customInbetween));
+						Thread.Sleep(dropTime - DateTime.Now - TimeSpan.FromMilliseconds(customDelay) + TimeSpan.FromMilliseconds(delay * customInbetween));
 					}
 					catch { }
 					for (int i = 0; i < 3; i++)
