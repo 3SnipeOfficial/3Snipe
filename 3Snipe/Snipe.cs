@@ -114,18 +114,8 @@ namespace _3Snipe
 			Console.WriteLine();
 			try
 			{
-				JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
-				string oldOwnerID = (string)tempObj["id"];
-				JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
-				List<int> indexList = new List<int>();
-				for (int i = 0; i < tempArr.Count; i++)
-				{
-					string name2 = (string)tempArr[i]["name"];
-					if (name.ToLower() == name2.ToLower())
-						indexList.Add(i);
-				}
-				int lastIndex = indexList[indexList.Count - 1] + 1;
-				dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
+				JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.nathan.cx/check/{name}").Result);
+				dropTime = DateTime.Parse((string)tempObj["drop_time"]);
 			}
 			catch
 			{
@@ -483,18 +473,8 @@ namespace _3Snipe
 			Console.WriteLine();
 			try
 			{
-				JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/users/profiles/minecraft/" + name + "?at=" + (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 3196800)).Result);
-				string oldOwnerID = (string)tempObj["id"];
-				JArray tempArr = JArray.Parse(sniperClient.GetStringAsync($"https://api.mojang.com/user/profiles/" + oldOwnerID + "/names").Result);
-				List<int> indexList = new List<int>();
-				for (int i = 0; i < tempArr.Count; i++)
-				{
-					string name2 = (string)tempArr[i]["name"];
-					if (name.ToLower() == name2.ToLower())
-						indexList.Add(i);
-				}
-				int lastIndex = indexList[indexList.Count - 1] + 1;
-				dropTime = DateTimeOffset.FromUnixTimeMilliseconds((long)tempArr[lastIndex]["changedToAt"] + 3196800000).ToLocalTime().DateTime;
+				JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.nathan.cx/check/{name}").Result);
+				dropTime = DateTime.Parse((string)tempObj["drop_time"]);
 			}
 			catch
 			{
