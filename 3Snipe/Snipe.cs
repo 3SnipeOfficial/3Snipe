@@ -473,8 +473,9 @@ namespace _3Snipe
 			Console.WriteLine();
 			try
 			{
-				JObject tempObj = JObject.Parse(sniperClient.GetStringAsync($"https://api.nathan.cx/check/{name}").Result);
-				dropTime = DateTime.Parse((string)tempObj["drop_time"]);
+				string page = sniperClient.GetStringAsync("https://namemc.com/name/" + name).Result;
+				string datetimestr = page.Split("<time id=\"availability-time\" class=\"text-nowrap\" datetime=\"")[1].Split("\"")[0];
+				dropTime = DateTime.Parse(datetimestr);
 			}
 			catch
 			{

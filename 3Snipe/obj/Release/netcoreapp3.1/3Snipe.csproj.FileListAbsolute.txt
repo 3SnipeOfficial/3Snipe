@@ -12,3 +12,4 @@ C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.c
 C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.dll
 C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.pdb
 C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.genruntimeconfig.cache
+C:\Users\Tyler\Documents\GitHub\3Snipe\3Snipe\obj\Release\netcoreapp3.1\3Snipe.csprojAssemblyReference.cache
