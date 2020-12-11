@@ -51,11 +51,10 @@ namespace _3Snipe
 				
 				Console.WriteLine(@"Sniping Menu:
 1) Snipe (multi-account or single)
-2) Block (multi-account or single) (Disabled)
-3) Back
+2) Back
 ");
 				char option = Console.ReadKey().KeyChar;
-				char[] options = { '1', '2', '3' };
+				char[] options = { '1', '2' };
 				while (!options.Contains(option))
 				{
 					Console.Write("\r \r");
@@ -64,8 +63,7 @@ namespace _3Snipe
 				switch (option)
 				{
 					case '1': SniperClass.mutliAcctSnipe(); break;
-					case '2': break;
-					case '3': return;
+					case '2': return;
 					default: break;
 				}
 			}
@@ -88,8 +86,7 @@ namespace _3Snipe
 				
 				Console.WriteLine(@"Tools:
 1) Do Security Questions
-2) Load proxies (Disabled)
-3) Back
+2) Back
 ");
 				char option = Console.ReadKey().KeyChar;
 				char[] options = { '1', '2', '3' };
@@ -101,8 +98,7 @@ namespace _3Snipe
 				switch (option)
 				{
 					case '1': doQuestions(); break;
-					case '2': break;
-					case '3': return;
+					case '2': return;
 					default: break;
 				}
 			}
