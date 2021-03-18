@@ -1,3 +1,9 @@
+# !!!!!! THIS SOFTWARE DOES NOT WORK ANYMORE AND IS NO LONGER SUPPORTED.
+## For alternatives, go to [MCSniperPY](https://github.com/MCSniperPY/MCSniperPY) or [GoSnipe](https://github.com/MCGoSnipe/GoSnipe).
+
+
+
+
 # 3Snipe
 The official 3Snipe repository that contains the source code and documentation.
 
