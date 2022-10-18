@@ -1,8 +1,3 @@
-# !!!!!! THIS SOFTWARE DOES NOT WORK ANYMORE AND IS NO LONGER SUPPORTED.
-## For alternatives, go to [MCSniperPY](https://github.com/MCSniperPY/MCSniperPY) or [GoSnipe](https://github.com/MCGoSnipe/GoSnipe).
-
-
-
 
 # 3Snipe
 The official 3Snipe repository that contains the source code and documentation.
@@ -13,8 +8,8 @@ The official 3Snipe repository that contains the source code and documentation.
 ## What version of .NET core do I need?
 You need .NET core 3.1, downloadable at https://dotnet.microsoft.com/download/dotnet-core/3.1.
 
-## Where do I download?
-It depends on what platform.
+## Where do I download 3Snipe?
+It depends on your platform, however all the download links are currently dead. Please wait for a fix.
 
 [Windows x64](https://ci.appveyor.com/api/projects/tygamer1to7/3snipe/artifacts/bin/win-x64.zip) 
 
