@@ -6,7 +6,7 @@ The official 3Snipe repository that contains the source code and documentation.
 3Snipe is a name sniper for Minecraft. It was the second public one (from our findings), the first being cardbooard/Minecraft-NameSniper-Blocker.
 
 ## What version of .NET core do I need?
-You need .NET core 3.1, downloadable at https://dotnet.microsoft.com/download/dotnet-core/3.1.
+You need .NET core 3.1, available at https://dotnet.microsoft.com/download/dotnet-core/3.1.
 
 ## Where do I download 3Snipe?
 It depends on your platform, however all the download links are currently dead. Please wait for a fix.
